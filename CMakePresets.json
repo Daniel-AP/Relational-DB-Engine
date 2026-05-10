@@ -1,0 +1,118 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "gxx-debug",
+      "displayName": "g++ Debug",
+      "description": "Configure DanDB with Ninja, g++, and debug symbols.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/gxx-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "DANDB_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "gxx-release",
+      "displayName": "g++ Release",
+      "description": "Configure DanDB with Ninja, g++, and release optimizations.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/gxx-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "DANDB_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "gxx-mingw-debug",
+      "displayName": "g++ MinGW Debug",
+      "description": "Configure DanDB with MinGW Makefiles, g++, and debug symbols.",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/out/build/gxx-mingw-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "DANDB_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "gxx-mingw-release",
+      "displayName": "g++ MinGW Release",
+      "description": "Configure DanDB with MinGW Makefiles, g++, and release optimizations.",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/out/build/gxx-mingw-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "DANDB_BUILD_TESTS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "gxx-debug",
+      "displayName": "Build g++ Debug",
+      "configurePreset": "gxx-debug"
+    },
+    {
+      "name": "gxx-release",
+      "displayName": "Build g++ Release",
+      "configurePreset": "gxx-release"
+    },
+    {
+      "name": "gxx-mingw-debug",
+      "displayName": "Build g++ MinGW Debug",
+      "configurePreset": "gxx-mingw-debug"
+    },
+    {
+      "name": "gxx-mingw-release",
+      "displayName": "Build g++ MinGW Release",
+      "configurePreset": "gxx-mingw-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "gxx-debug",
+      "displayName": "Test g++ Debug",
+      "configurePreset": "gxx-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "gxx-release",
+      "displayName": "Test g++ Release",
+      "configurePreset": "gxx-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "gxx-mingw-debug",
+      "displayName": "Test g++ MinGW Debug",
+      "configurePreset": "gxx-mingw-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "gxx-mingw-release",
+      "displayName": "Test g++ MinGW Release",
+      "configurePreset": "gxx-mingw-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
