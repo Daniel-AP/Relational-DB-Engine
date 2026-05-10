@@ -20,6 +20,8 @@ include(CompilerWarnings)
 include(Sanitizers)
 
 set(DANDB_LIBRARY_HEADERS
+    include/dandb/core/Result.h
+    include/dandb/core/Status.h
     include/dandb/core/version.h
 )
 
