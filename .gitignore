@@ -23,6 +23,10 @@ CMakeUserPresets.json
 *.vcxproj.filters
 *.vcxproj.user
 
+# VS code files
+
+.vscode/
+
 # Compiled objects and libraries
 *.o
 *.obj
