@@ -22,11 +22,14 @@ include(Sanitizers)
 set(DANDB_LIBRARY_HEADERS
     include/dandb/core/Result.h
     include/dandb/core/Status.h
-    include/dandb/core/version.h
+    include/dandb/core/Version.h
+    include/dandb/core/Constants.h
+    include/dandb/storage/DiskManager.h
 )
 
 set(DANDB_LIBRARY_SOURCES
-    src/core/version.cpp
+    src/core/Version.cpp
+    src/storage/DiskManager.cpp
 )
 
 add_library(DanDBLib

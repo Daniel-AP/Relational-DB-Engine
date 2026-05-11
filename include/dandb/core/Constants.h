@@ -5,8 +5,8 @@
 namespace dandb {
     namespace core {
 
-        using PageId = std::int32_t;
-        using SlotId = std::int16_t;
+        using PageId = std::uint32_t;
+        using SlotId = std::uint16_t;
 
         inline constexpr std::uint32_t PAGE_SIZE_BYTES = 4096;
         inline constexpr PageId INVALID_PAGE_ID = 0xFFFFFFFF;

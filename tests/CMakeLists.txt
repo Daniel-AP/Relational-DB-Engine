@@ -2,6 +2,7 @@ set(DANDB_TEST_SOURCES
     core/resultTests.cpp
     core/statusTests.cpp
     core/versionTests.cpp
+    storage/diskManagerTests.cpp
 )
 
 if(TARGET Catch2::Catch2WithMain AND DANDB_TEST_SOURCES)

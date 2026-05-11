@@ -3,8 +3,8 @@
 #include <string>
 
 namespace dandb {
-	namespace core {
-		std::string projectName();
-		std::string projectVersion();
-	}
+    namespace core {
+        std::string projectName();
+        std::string projectVersion();
+    }
 }
