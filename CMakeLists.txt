@@ -26,12 +26,14 @@ set(DANDB_LIBRARY_HEADERS
     include/dandb/core/Constants.h
     include/dandb/storage/DiskManager.h
     include/dandb/buffer/Page.h
+    include/dandb/buffer/LRUReplacer.h
 )
 
 set(DANDB_LIBRARY_SOURCES
     src/core/Version.cpp
     src/storage/DiskManager.cpp
     src/buffer/Page.cpp
+    src/buffer/LRUReplacer.cpp
 )
 
 add_library(DanDBLib
