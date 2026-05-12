@@ -1,4 +1,5 @@
 set(DANDB_TEST_SOURCES
+    buffer/pageTests.cpp
     core/resultTests.cpp
     core/statusTests.cpp
     core/versionTests.cpp
