@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <variant>
+#include <utility>
 
 namespace dandb {
     namespace record {
@@ -39,7 +40,7 @@ namespace dandb {
                 }
 
                 static Value string(std::string value) {
-                    return Value(LogicalType::String, false, value);
+                    return Value(LogicalType::String, false, std::move(value));
                 }
 
                 static Value null(LogicalType type) {
