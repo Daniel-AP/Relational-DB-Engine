@@ -33,6 +33,10 @@ namespace dandb {
                     }
                 }
 
+                if(col.primaryKey && col.nullable) {
+                    return dandb::core::Status::InvalidArgument("Cannot create schema: a primary key cannot be nullable");
+                }
+
                 if(seenNames.find(col.name) != seenNames.end()) {
                     return dandb::core::Status::InvalidArgument("Cannot create schema: some columns have duplicate names");
                 } else {
