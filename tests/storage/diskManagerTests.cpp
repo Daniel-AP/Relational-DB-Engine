@@ -40,7 +40,7 @@ namespace {
         inline static int nextId_ = 0;
     };
 
-    std::uint32_t readLittleEndian32(const std::filesystem::path& filePath, std::streamoff offset) {
+    uint32_t readLittleEndian32(const std::filesystem::path& filePath, std::streamoff offset) {
 
         std::ifstream file(filePath, std::ios::binary);
         REQUIRE(file.is_open());
@@ -50,10 +50,10 @@ namespace {
         file.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
         REQUIRE(file.gcount() == static_cast<std::streamsize>(bytes.size()));
 
-        const auto byte0 = static_cast<std::uint32_t>(bytes[0]);
-        const auto byte1 = static_cast<std::uint32_t>(bytes[1])<<8;
-        const auto byte2 = static_cast<std::uint32_t>(bytes[2])<<16;
-        const auto byte3 = static_cast<std::uint32_t>(bytes[3])<<24;
+        const auto byte0 = static_cast<uint32_t>(bytes[0]);
+        const auto byte1 = static_cast<uint32_t>(bytes[1])<<8;
+        const auto byte2 = static_cast<uint32_t>(bytes[2])<<16;
+        const auto byte3 = static_cast<uint32_t>(bytes[3])<<24;
 
         return byte0 | byte1 | byte2 | byte3;
 
@@ -76,7 +76,7 @@ namespace {
 
         std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> page{};
 
-        for(std::size_t index = 0; index < page.size(); index++) {
+        for(size_t index = 0; index < page.size(); index++) {
             page[index] = static_cast<std::byte>(
                 (static_cast<unsigned int>(seed)+static_cast<unsigned int>(index))%256
             );
@@ -100,7 +100,7 @@ TEST_CASE("New page file creates header page", "[storage][disk]") {
     REQUIRE(readMagic(filePath) == std::array<char, 4>{ 'D', 'P', 'A', 'G' });
     REQUIRE(readLittleEndian32(filePath, 4) == dandb::core::PAGE_SIZE_BYTES);
     REQUIRE(readLittleEndian32(filePath, 8) == 1);
-    REQUIRE(readLittleEndian32(filePath, 12) == static_cast<std::uint32_t>(dandb::core::INVALID_PAGE_ID));
+    REQUIRE(readLittleEndian32(filePath, 12) == static_cast<uint32_t>(dandb::core::INVALID_PAGE_ID));
     REQUIRE(readLittleEndian32(filePath, 16) == 0);
     REQUIRE(disk.pageCount() == 1);
 
@@ -243,14 +243,14 @@ TEST_CASE("Free page is reused by the next allocation", "[storage][disk]") {
 
     const auto freeStatus = disk.freePage(page1.value());
     REQUIRE(freeStatus.ok());
-    REQUIRE(readLittleEndian32(filePath, 12) == static_cast<std::uint32_t>(page1.value()));
+    REQUIRE(readLittleEndian32(filePath, 12) == static_cast<uint32_t>(page1.value()));
     REQUIRE(readLittleEndian32(filePath, 16) == 1);
 
     const auto reusedPage = disk.allocatePage();
     REQUIRE(reusedPage.ok());
     REQUIRE(reusedPage.value() == page1.value());
     REQUIRE(disk.pageCount() == 3);
-    REQUIRE(readLittleEndian32(filePath, 12) == static_cast<std::uint32_t>(dandb::core::INVALID_PAGE_ID));
+    REQUIRE(readLittleEndian32(filePath, 12) == static_cast<uint32_t>(dandb::core::INVALID_PAGE_ID));
     REQUIRE(readLittleEndian32(filePath, 16) == 0);
 }
 

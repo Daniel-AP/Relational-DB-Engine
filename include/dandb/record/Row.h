@@ -16,11 +16,11 @@ namespace dandb {
 
                 }
 
-                std::size_t valueCount() const {
+                size_t valueCount() const {
                     return values_.size();
                 }
 
-                const Value& value(std::size_t index) const {
+                const Value& value(size_t index) const {
                     return values_[index];
                 }
 

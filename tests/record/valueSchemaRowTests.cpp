@@ -11,7 +11,7 @@
 TEST_CASE("Value factories store type, nullness, and payload", "[record][value]") {
 
     const auto active = dandb::record::Value::boolean(true);
-    const auto rating = dandb::record::Value::byte(static_cast<std::int8_t>(-7));
+    const auto rating = dandb::record::Value::byte(static_cast<int8_t>(-7));
     const auto age = dandb::record::Value::int32(42);
     const auto visits = dandb::record::Value::int64(9000000000);
     const auto balance = dandb::record::Value::doubleValue(19.5);
@@ -23,7 +23,7 @@ TEST_CASE("Value factories store type, nullness, and payload", "[record][value]"
     REQUIRE(active.asBoolean());
 
     REQUIRE(rating.type() == dandb::record::LogicalType::Byte);
-    REQUIRE(rating.asByte() == static_cast<std::int8_t>(-7));
+    REQUIRE(rating.asByte() == static_cast<int8_t>(-7));
 
     REQUIRE(age.type() == dandb::record::LogicalType::Int32);
     REQUIRE(age.asInt32() == 42);
