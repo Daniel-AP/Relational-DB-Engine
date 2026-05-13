@@ -20,7 +20,7 @@ namespace dandb {
                 DiskManager(DiskManager&&) = delete;
                 DiskManager& operator=(DiskManager&&) = delete;
 
-                dandb::core::Result<dandb::core::PageId> allocatePage();
+                [[nodiscard]] dandb::core::Result<dandb::core::PageId> allocatePage();
                 [[nodiscard]] dandb::core::Status freePage(dandb::core::PageId pageId);
                 [[nodiscard]] dandb::core::Status readPage(dandb::core::PageId pageId, std::array<std::byte, dandb::core::PAGE_SIZE_BYTES>& out);
                 [[nodiscard]] dandb::core::Status writePage(dandb::core::PageId pageId, const std::array<std::byte, dandb::core::PAGE_SIZE_BYTES>& data);

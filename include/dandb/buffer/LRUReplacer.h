@@ -20,7 +20,7 @@ namespace dandb {
 
                 [[nodiscard]] dandb::core::Status pin(size_t slotId);
                 [[nodiscard]] dandb::core::Status unpin(size_t slotId);
-                dandb::core::Result<size_t> getVictim();
+                [[nodiscard]] dandb::core::Result<size_t> getVictim();
 
             private:
                 size_t capacity_;

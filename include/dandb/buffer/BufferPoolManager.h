@@ -27,8 +27,8 @@ namespace dandb {
 
                 size_t getPoolSize() const;
 
-                dandb::core::Result<dandb::buffer::Page*> newPage();
-                dandb::core::Result<dandb::buffer::Page*> fetchPage(dandb::core::PageId pageId);
+                [[nodiscard]] dandb::core::Result<dandb::buffer::Page*> newPage();
+                [[nodiscard]] dandb::core::Result<dandb::buffer::Page*> fetchPage(dandb::core::PageId pageId);
                 [[nodiscard]] dandb::core::Status unpinPage(dandb::core::PageId pageId, bool isDirty);
                 [[nodiscard]] dandb::core::Status savePageToDisk(dandb::core::PageId pageId);
                 [[nodiscard]] dandb::core::Status saveAllPagesToDisk();
