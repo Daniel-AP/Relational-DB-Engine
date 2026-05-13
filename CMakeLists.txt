@@ -27,6 +27,7 @@ set(DANDB_LIBRARY_HEADERS
     include/dandb/storage/DiskManager.h
     include/dandb/buffer/Page.h
     include/dandb/buffer/LRUReplacer.h
+    include/dandb/buffer/BufferPoolManager.h
 )
 
 set(DANDB_LIBRARY_SOURCES
@@ -34,6 +35,7 @@ set(DANDB_LIBRARY_SOURCES
     src/storage/DiskManager.cpp
     src/buffer/Page.cpp
     src/buffer/LRUReplacer.cpp
+    src/buffer/BufferPoolManager.cpp
 )
 
 add_library(DanDBLib
