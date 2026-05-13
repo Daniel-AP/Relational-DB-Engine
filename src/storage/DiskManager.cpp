@@ -268,7 +268,7 @@ namespace dandb {
                 return dandb::core::Status::IOError("Cannot write page in disk file '" + filePath_.string() + "': unable to read file");
             }
 
-            if(currentPage[4] != static_cast<std::byte>(0xFFu) || currentPage[5] != static_cast<std::byte>(0xFFu)) {
+            if(currentPage[4] == static_cast<std::byte>(0xFFu) && currentPage[5] == static_cast<std::byte>(0xFFu)) {
                 return dandb::core::Status::InvalidArgument("Unable to write page " + std::to_string(pageId) + ": page is free");
             }
 
