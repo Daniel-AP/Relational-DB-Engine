@@ -5,6 +5,7 @@ set(DANDB_TEST_SOURCES
     core/resultTests.cpp
     core/statusTests.cpp
     core/versionTests.cpp
+    record/valueSchemaRowTests.cpp
     storage/diskManagerTests.cpp
 )
 
