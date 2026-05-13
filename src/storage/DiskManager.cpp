@@ -79,7 +79,7 @@ namespace dandb {
                 std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> newPage{};
 
                 file.clear();
-                file.seekp(allocatedPageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
+                file.seekp(1ULL*allocatedPageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
                 file.write(reinterpret_cast<char*>(newPage.data()), dandb::core::PAGE_SIZE_BYTES);
                 file.flush();
 
@@ -114,7 +114,7 @@ namespace dandb {
                 std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> newPage{};
 
                 file.clear();
-                file.seekp(allocatedPageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
+                file.seekp(1ULL*allocatedPageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
                 file.write(reinterpret_cast<char*>(newPage.data()), dandb::core::PAGE_SIZE_BYTES);
                 file.flush();
 
@@ -229,7 +229,7 @@ namespace dandb {
             }
 
             file.clear();
-            file.seekg(pageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
+            file.seekg(1ULL*pageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
 
             std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> page{};
             file.read(reinterpret_cast<char*>(page.data()), dandb::core::PAGE_SIZE_BYTES);
@@ -281,7 +281,7 @@ namespace dandb {
             }
 
             file.clear();
-            file.seekp(pageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
+            file.seekp(1ULL*pageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
             file.write(reinterpret_cast<const char*>(data.data()), dandb::core::PAGE_SIZE_BYTES);
             file.flush();
 
