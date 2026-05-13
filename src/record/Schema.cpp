@@ -26,6 +26,16 @@ namespace dandb {
 
             for(const auto& col: columns) {
 
+                if(col.name.empty()) {
+                    return dandb::core::Status::InvalidArgument("Cannot create schema: some columns have an empty name");
+                }
+
+                if(seenNames.find(col.name) != seenNames.end()) {
+                    return dandb::core::Status::InvalidArgument("Cannot create schema: some columns have duplicate names");
+                } else {
+                    seenNames.insert(col.name);
+                }
+
                 if(col.primaryKey) {
                     if(pk) {
                         return dandb::core::Status::InvalidArgument("Cannot create schema with more than 1 primary key");
@@ -36,12 +46,6 @@ namespace dandb {
 
                 if(col.primaryKey && col.nullable) {
                     return dandb::core::Status::InvalidArgument("Cannot create schema: a primary key cannot be nullable");
-                }
-
-                if(seenNames.find(col.name) != seenNames.end()) {
-                    return dandb::core::Status::InvalidArgument("Cannot create schema: some columns have duplicate names");
-                } else {
-                    seenNames.insert(col.name);
                 }
 
                 if(col.type == LogicalType::String && col.stringCapacity == 0) {
