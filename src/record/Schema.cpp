@@ -1,6 +1,7 @@
 #include <dandb/record/Schema.h>
 #include <dandb/core/Status.h>
 
+#include <utility>
 #include <unordered_set>
 
 namespace dandb {
@@ -53,7 +54,7 @@ namespace dandb {
 
             }
 
-            return Schema{columns};
+            return Schema{std::move(columns)};
 
         }
 
