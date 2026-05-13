@@ -18,8 +18,8 @@ namespace dandb {
                 size_t capacity() const;
                 size_t size() const;
 
-                dandb::core::Status pin(size_t slotId);
-                dandb::core::Status unpin(size_t slotId);
+                [[nodiscard]] dandb::core::Status pin(size_t slotId);
+                [[nodiscard]] dandb::core::Status unpin(size_t slotId);
                 dandb::core::Result<size_t> getVictim();
 
             private:

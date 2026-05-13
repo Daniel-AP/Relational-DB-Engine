@@ -16,7 +16,7 @@ namespace dandb {
         }
 
         BufferPoolManager::~BufferPoolManager() {
-            saveAllPagesToDisk();
+            static_cast<void>(saveAllPagesToDisk());
         }
 
         size_t BufferPoolManager::getPoolSize() const {

@@ -24,9 +24,9 @@ namespace dandb {
 
                 dandb::core::Result<dandb::buffer::Page*> newPage();
                 dandb::core::Result<dandb::buffer::Page*> fetchPage(dandb::core::PageId pageId);
-                dandb::core::Status unpinPage(dandb::core::PageId pageId, bool isDirty);
-                dandb::core::Status savePageToDisk(dandb::core::PageId pageId);
-                dandb::core::Status saveAllPagesToDisk();
+                [[nodiscard]] dandb::core::Status unpinPage(dandb::core::PageId pageId, bool isDirty);
+                [[nodiscard]] dandb::core::Status savePageToDisk(dandb::core::PageId pageId);
+                [[nodiscard]] dandb::core::Status saveAllPagesToDisk();
 
             private:
                 struct AvailableSlot {
@@ -42,7 +42,7 @@ namespace dandb {
                 dandb::buffer::LRUReplacer lruReplacer_;
 
                 dandb::core::Result<AvailableSlot> getAvailableSlot();
-                dandb::core::Status restoreAvailableSlot(const AvailableSlot& availableSlot);
+                [[nodiscard]] dandb::core::Status restoreAvailableSlot(const AvailableSlot& availableSlot);
 
         };
 

@@ -23,7 +23,7 @@ namespace dandb {
 
                 uint32_t pinCount() const;
                 void pin();
-                dandb::core::Status unpin();
+                [[nodiscard]] dandb::core::Status unpin();
 
                 bool isDirty() const;
                 void setDirty(bool dirty);
