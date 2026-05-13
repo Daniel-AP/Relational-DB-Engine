@@ -20,6 +20,11 @@ namespace dandb {
                 BufferPoolManager(size_t poolSize, dandb::storage::DiskManager& dm);
                 ~BufferPoolManager();
 
+                BufferPoolManager(const BufferPoolManager&) = delete;
+                BufferPoolManager& operator=(const BufferPoolManager&) = delete;
+                BufferPoolManager(BufferPoolManager&&) = delete;
+                BufferPoolManager& operator=(BufferPoolManager&&) = delete;
+
                 size_t getPoolSize() const;
 
                 dandb::core::Result<dandb::buffer::Page*> newPage();

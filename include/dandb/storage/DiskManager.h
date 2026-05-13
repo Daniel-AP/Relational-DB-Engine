@@ -15,6 +15,10 @@ namespace dandb {
         class DiskManager {
             public:
                 DiskManager(std::filesystem::path filePath, std::array<char, 4> magic);
+                DiskManager(const DiskManager&) = delete;
+                DiskManager& operator=(const DiskManager&) = delete;
+                DiskManager(DiskManager&&) = delete;
+                DiskManager& operator=(DiskManager&&) = delete;
 
                 dandb::core::Result<dandb::core::PageId> allocatePage();
                 [[nodiscard]] dandb::core::Status freePage(dandb::core::PageId pageId);
