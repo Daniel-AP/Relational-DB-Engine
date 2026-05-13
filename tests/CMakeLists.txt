@@ -1,4 +1,5 @@
 set(DANDB_TEST_SOURCES
+    buffer/bufferPoolManagerTests.cpp
     buffer/lruReplacerTests.cpp
     buffer/pageTests.cpp
     core/resultTests.cpp
