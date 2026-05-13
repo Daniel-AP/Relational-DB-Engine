@@ -3,12 +3,19 @@
 #include <dandb/core/Status.h>
 #include <optional>
 #include <stdexcept>
+#include <type_traits>
 
 namespace dandb {
     namespace core {
 
         template<typename T>
         class Result {
+
+            static_assert(
+                !std::is_same_v<T, Status>,
+                "Result<Status> is not allowed. Use Status directly instead."
+            );
+
             public:
                 Result(T value)
                     : status_(Status::Ok()), value_(value) {
