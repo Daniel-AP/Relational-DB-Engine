@@ -106,6 +106,8 @@ namespace dandb {
                     return headerStatus;
                 }
 
+            } else if(pageCount_ == dandb::core::INVALID_PAGE_ID) {
+                return dandb::core::Status::Internal("Cannot allocate page: the maximum number of pages has been reached");
             } else {
 
                 allocatedPageId = pageCount_;
