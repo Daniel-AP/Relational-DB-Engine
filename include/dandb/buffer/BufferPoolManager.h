@@ -18,6 +18,7 @@ namespace dandb {
 
             public:
                 BufferPoolManager(size_t poolSize, dandb::storage::DiskManager& bpm);
+                ~BufferPoolManager();
 
                 size_t getPoolSize() const;
 

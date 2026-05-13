@@ -15,6 +15,10 @@ namespace dandb {
             for(size_t i = 0; i < poolSize; i++) freeSlots_[i] = i;
         }
 
+        BufferPoolManager::~BufferPoolManager() {
+            saveAllPagesToDisk();
+        }
+
         size_t BufferPoolManager::getPoolSize() const {
             return pages_.size();
         }
