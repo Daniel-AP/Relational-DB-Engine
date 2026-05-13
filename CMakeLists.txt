@@ -28,6 +28,7 @@ set(DANDB_LIBRARY_HEADERS
     include/dandb/buffer/Page.h
     include/dandb/buffer/LRUReplacer.h
     include/dandb/buffer/BufferPoolManager.h
+    include/dandb/record/RID.h
 )
 
 set(DANDB_LIBRARY_SOURCES
