@@ -32,6 +32,8 @@ set(DANDB_LIBRARY_HEADERS
     include/dandb/record/Value.h
     include/dandb/record/Row.h
     include/dandb/record/Schema.h
+    include/dandb/record/Layout.h
+    include/dandb/record/Codec.h
 )
 
 set(DANDB_LIBRARY_SOURCES
@@ -41,6 +43,8 @@ set(DANDB_LIBRARY_SOURCES
     src/buffer/LRUReplacer.cpp
     src/buffer/BufferPoolManager.cpp
     src/record/Schema.cpp
+    src/record/Layout.cpp
+    src/record/Codec.cpp
 )
 
 add_library(DanDBLib
