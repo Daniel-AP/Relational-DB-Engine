@@ -2,11 +2,13 @@ set(DANDB_TEST_SOURCES
     buffer/bufferPoolManagerTests.cpp
     buffer/lruReplacerTests.cpp
     buffer/pageTests.cpp
+    core/helperTests.cpp
     core/resultTests.cpp
     core/statusTests.cpp
     core/versionTests.cpp
     record/codecTests.cpp
     record/layoutTests.cpp
+    record/slottedPageTests.cpp
     record/valueSchemaRowTests.cpp
     storage/diskManagerTests.cpp
 )
