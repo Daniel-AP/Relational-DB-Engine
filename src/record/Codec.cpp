@@ -2,6 +2,7 @@
 #include <dandb/record/Layout.h>
 
 #include <cstring>
+#include <utility>
 
 namespace dandb {
     namespace record {
@@ -9,7 +10,7 @@ namespace dandb {
         dandb::core::Result<std::vector<std::byte>> Codec::encode(const Schema& schema, const Row& row) {
             
             if(row.valueCount() != schema.columnCount()) {
-                return dandb::core::Status::InvalidArgument("Cannot encode the row: row value count and schema column count differ");
+                return dandb::core::Status::InvalidArgument("Cannot encode row: row value count and schema column count differ");
             }
 
             size_t count = row.valueCount();
@@ -95,6 +96,108 @@ namespace dandb {
 
         dandb::core::Result<Row> Codec::decode(const Schema& schema, const std::vector<std::byte>& row) {
 
+            if(dandb::record::layout::encodedSize(schema) != row.size()) {
+                return dandb::core::Status::InvalidArgument("Cannot decode row: schema encoding size and row size differ");
+            }
+
+            if(std::to_integer<size_t>(row[0]) != schema.columnCount()) {
+                return dandb::core::Status::InvalidArgument("Cannot decode row: schema column count and row value count differ");
+            }
+
+            size_t count = schema.columnCount();
+            size_t nullBitmapSize = dandb::record::layout::nullBitmapSize(count);
+
+            std::vector<bool> nullBitmap(count);
+
+            size_t offset = 1;
+
+            for(size_t i = 0; i < count; i++) {
+                size_t colByte = i/8;
+                size_t colBit = i%8;
+                nullBitmap[i] = static_cast<uint8_t>((row[offset+colByte]>>colBit)&std::byte{1}) != 0;
+            }
+
+            uint8_t lastNullBitmapByte = std::to_integer<uint8_t>(row[offset+nullBitmapSize-1]);
+            uint8_t unusedBitsMask = (0xFFu<<(count%8));
+
+            if((lastNullBitmapByte&unusedBitsMask) != 0) {
+                return dandb::core::Status::InvalidArgument("Cannot decode row: null bitmap has non-zero unused bits");
+            }
+
+            offset += nullBitmapSize;
+            offset = dandb::record::layout::alignTo(offset, 8);
+
+            std::vector<Value> values;
+            values.reserve(count);
+
+            for(size_t i = 0; i < count; i++) {
+
+                const Column& col = schema.column(i);
+
+                size_t alignment = dandb::record::layout::valueAlignment(col.type);
+                offset = dandb::record::layout::alignTo(offset, alignment);
+
+                if(nullBitmap[i]) {
+
+                    if(!col.nullable) {
+                        return dandb::core::Status::InvalidArgument("Cannot decode row: non-NULL column has NULL value at index "+std::to_string(i));
+                    }
+
+                    for(size_t j = 0; j < dandb::record::layout::valueSize(col); j++) {
+                        if(row[offset+j] != std::byte{0}) {
+                            return dandb::core::Status::InvalidArgument("Cannot decode row: NULL value has non-zero payload bytes at column index "+std::to_string(i));
+                        }
+                    }
+
+                    offset += dandb::record::layout::valueSize(col);
+                    values.push_back(Value::null(col.type));
+
+                    continue;
+                }
+
+                switch(col.type) {
+                    case LogicalType::Boolean: {
+                        values.push_back(Value::boolean(static_cast<uint8_t>(row[offset]) != 0));
+                        break;
+                    }
+                    case LogicalType::Byte: {
+                        values.push_back(Value::byte(static_cast<int8_t>(row[offset])));
+                        break;
+                    }
+                    case LogicalType::Int32: {
+                        int32_t value = static_cast<int32_t>(readUint32(row, offset));
+                        values.push_back(Value::int32(value));
+                        break;
+                    }
+                    case LogicalType::Int64: {
+                        int64_t value = static_cast<int64_t>(readUint64(row, offset));
+                        values.push_back(Value::int64(value));
+                        break;
+                    }
+                    case LogicalType::Double: {
+                        double value = readDouble(row, offset);
+                        values.push_back(Value::doubleValue(value));
+                        break;
+                    }
+                    case LogicalType::String: {
+                        std::string stringValue;
+                        stringValue.reserve(col.stringCapacity);
+                        for(size_t j = 0; j < col.stringCapacity; j++) {
+                            char ch = static_cast<char>(row[offset+j]);
+                            if(ch == '\0') break;
+                            stringValue += ch;
+                        }
+                        values.push_back(Value::string(stringValue));
+                        break;
+                    }
+                }
+
+                offset += dandb::record::layout::valueSize(col);
+
+            }
+
+            return Row(std::move(values));
+
         }
 
         void Codec::writeUint32(std::span<std::byte> buffer, size_t offset, uint32_t value) {
@@ -102,6 +205,17 @@ namespace dandb {
             for(size_t i = 0; i < 4; i++) {
                 buffer[offset+i] = static_cast<std::byte>((value>>(8*i))&0xFFu);
             }
+
+        }
+
+        uint32_t Codec::readUint32(std::span<const std::byte> buffer, size_t offset) {
+
+            uint32_t res = 0;
+            for(size_t i = 0; i < 4; i++) {
+                res |= std::to_integer<uint32_t>(buffer[offset+i]) << (8*i);
+            }
+
+            return res;
 
         }
 
@@ -113,6 +227,17 @@ namespace dandb {
 
         }
 
+        uint64_t Codec::readUint64(std::span<const std::byte> buffer, size_t offset) {
+            
+            uint64_t res = 0;
+            for(size_t i = 0; i < 8; i++) {
+                res |= std::to_integer<uint64_t>(buffer[offset+i]) << (8*i);
+            }
+
+            return res;
+            
+        }
+
         void Codec::writeDouble(std::span<std::byte> buffer, size_t offset, double value) {
 
             std::array<std::byte, 8> doubleBytes{};
@@ -121,6 +246,15 @@ namespace dandb {
             for(size_t i = 0; i < doubleBytes.size(); i++) {
                 buffer[offset+i] = doubleBytes[i];
             }
+
+        }
+
+        double Codec::readDouble(std::span<const std::byte> buffer, size_t offset) {
+
+            double value;
+            std::memcpy(&value, buffer.data()+offset, sizeof(double));
+            
+            return value;
 
         }
 

@@ -18,8 +18,11 @@ namespace dandb {
 
             private:
                 static void writeUint32(std::span<std::byte> buffer, size_t offset, uint32_t value);
+                static uint32_t readUint32(std::span<const std::byte> buffer, size_t offset);
                 static void writeUint64(std::span<std::byte> buffer, size_t offset, uint64_t value);
+                static uint64_t readUint64(std::span<const std::byte> buffer, size_t offset);
                 static void writeDouble(std::span<std::byte> buffer, size_t offset, double value);
+                static double readDouble(std::span<const std::byte> buffer, size_t offset);
 
         };
 
