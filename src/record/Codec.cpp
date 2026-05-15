@@ -1,3 +1,4 @@
+#include <dandb/core/Helper.h>
 #include <dandb/record/Codec.h>
 #include <dandb/record/Layout.h>
 
@@ -72,13 +73,13 @@ namespace dandb {
                         encoded[offset] = std::byte{static_cast<uint8_t>(val.asByte())};
                         break;
                     case LogicalType::Int32:
-                        writeUint32(encoded, offset, val.asInt32());
+                        dandb::core::helper::writeUint32(encoded, offset, val.asInt32());
                         break;
                     case LogicalType::Int64:
-                        writeUint64(encoded, offset, val.asInt64());
+                        dandb::core::helper::writeUint64(encoded, offset, val.asInt64());
                         break;
                     case LogicalType::Double:
-                        writeDouble(encoded, offset, val.asDouble());
+                        dandb::core::helper::writeDouble(encoded, offset, val.asDouble());
                         break;
                     case LogicalType::String:
                         std::string stringValue = val.asString();
@@ -165,17 +166,17 @@ namespace dandb {
                         break;
                     }
                     case LogicalType::Int32: {
-                        int32_t value = static_cast<int32_t>(readUint32(row, offset));
+                        int32_t value = static_cast<int32_t>(dandb::core::helper::readUint32(row, offset));
                         values.push_back(Value::int32(value));
                         break;
                     }
                     case LogicalType::Int64: {
-                        int64_t value = static_cast<int64_t>(readUint64(row, offset));
+                        int64_t value = static_cast<int64_t>(dandb::core::helper::readUint64(row, offset));
                         values.push_back(Value::int64(value));
                         break;
                     }
                     case LogicalType::Double: {
-                        double value = readDouble(row, offset);
+                        double value = dandb::core::helper::readDouble(row, offset);
                         values.push_back(Value::doubleValue(value));
                         break;
                     }
@@ -197,64 +198,6 @@ namespace dandb {
             }
 
             return Row(std::move(values));
-
-        }
-
-        void Codec::writeUint32(std::span<std::byte> buffer, size_t offset, uint32_t value) {
-
-            for(size_t i = 0; i < 4; i++) {
-                buffer[offset+i] = static_cast<std::byte>((value>>(8*i))&0xFFu);
-            }
-
-        }
-
-        uint32_t Codec::readUint32(std::span<const std::byte> buffer, size_t offset) {
-
-            uint32_t res = 0;
-            for(size_t i = 0; i < 4; i++) {
-                res |= std::to_integer<uint32_t>(buffer[offset+i]) << (8*i);
-            }
-
-            return res;
-
-        }
-
-        void Codec::writeUint64(std::span<std::byte> buffer, size_t offset, uint64_t value) {
-
-            for(size_t i = 0; i < 8; i++) {
-                buffer[offset+i] = static_cast<std::byte>((value>>(8*i))&0xFFu);
-            }
-
-        }
-
-        uint64_t Codec::readUint64(std::span<const std::byte> buffer, size_t offset) {
-            
-            uint64_t res = 0;
-            for(size_t i = 0; i < 8; i++) {
-                res |= std::to_integer<uint64_t>(buffer[offset+i]) << (8*i);
-            }
-
-            return res;
-            
-        }
-
-        void Codec::writeDouble(std::span<std::byte> buffer, size_t offset, double value) {
-
-            std::array<std::byte, 8> doubleBytes{};
-            std::memcpy(doubleBytes.data(), &value, doubleBytes.size());
-
-            for(size_t i = 0; i < doubleBytes.size(); i++) {
-                buffer[offset+i] = doubleBytes[i];
-            }
-
-        }
-
-        double Codec::readDouble(std::span<const std::byte> buffer, size_t offset) {
-
-            double value;
-            std::memcpy(&value, buffer.data()+offset, sizeof(double));
-            
-            return value;
 
         }
 

@@ -1,3 +1,4 @@
+#include <dandb/core/Helper.h>
 #include <dandb/storage/DiskManager.h>
 
 #include <fstream>
@@ -74,7 +75,7 @@ namespace dandb {
                     return readStatus;
                 }
 
-                firstFreePageId_ = readUint32(currentPage, 8);
+                firstFreePageId_ = dandb::core::helper::readUint32(currentPage, 8);
 
                 std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> newPage{};
 
@@ -171,9 +172,9 @@ namespace dandb {
 
             std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> freedPage{};
 
-            writeUint32(freedPage, 0, pageId);
+            dandb::core::helper::writeUint32(freedPage, 0, pageId);
             freedPage[4] = freedPage[5] = static_cast<std::byte>(0xFFu);
-            writeUint32(freedPage, 8, firstFreePageId_);
+            dandb::core::helper::writeUint32(freedPage, 8, firstFreePageId_);
 
             const auto previousFirstFreePageId = firstFreePageId_;
             const auto previousFreePageCount = freePageCount_;
@@ -323,9 +324,9 @@ namespace dandb {
                 }
             }
 
-            pageCount_ = readUint32(header, 8);
-            firstFreePageId_ = readUint32(header, 12);
-            freePageCount_ = readUint32(header, 16);
+            pageCount_ = dandb::core::helper::readUint32(header, 8);
+            firstFreePageId_ = dandb::core::helper::readUint32(header, 12);
+            freePageCount_ = dandb::core::helper::readUint32(header, 16);
 
             return dandb::core::Status::Ok();
 
@@ -343,10 +344,10 @@ namespace dandb {
                 header[i] = static_cast<std::byte>(magic_[i]);
             }
 
-            writeUint32(header, 4, dandb::core::PAGE_SIZE_BYTES);
-            writeUint32(header, 8, pageCount_);
-            writeUint32(header, 12, firstFreePageId_);
-            writeUint32(header, 16, freePageCount_);
+            dandb::core::helper::writeUint32(header, 4, dandb::core::PAGE_SIZE_BYTES);
+            dandb::core::helper::writeUint32(header, 8, pageCount_);
+            dandb::core::helper::writeUint32(header, 12, firstFreePageId_);
+            dandb::core::helper::writeUint32(header, 16, freePageCount_);
 
             file.clear();
             file.seekp(0, std::ios::beg);
@@ -360,25 +361,5 @@ namespace dandb {
             return dandb::core::Status::Ok();
 
         }
-
-        void DiskManager::writeUint32(std::span<std::byte> buffer, size_t offset, uint32_t value) {
-
-            for(size_t i = 0; i < 4; i++) {
-                buffer[offset+i] = static_cast<std::byte>((value>>(8*i))&0xFFu);
-            }
-
-        }
-
-        uint32_t DiskManager::readUint32(std::span<const std::byte> buffer, size_t offset) {
-
-            uint32_t res = 0;
-            for(size_t i = 0; i < 4; i++) {
-                res |= std::to_integer<uint32_t>(buffer[offset+i]) << (8*i);
-            }
-
-            return res;
-
-        }
-
     }
 }

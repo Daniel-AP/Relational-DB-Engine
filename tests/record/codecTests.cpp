@@ -1,3 +1,4 @@
+#include <dandb/core/Helper.h>
 #include <dandb/record/Codec.h>
 #include <dandb/record/Row.h>
 #include <dandb/record/Schema.h>
@@ -5,10 +6,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <array>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <string>
 #include <vector>
 
@@ -45,33 +44,6 @@ namespace {
 
     }
 
-    void writeUint32(std::vector<std::byte>& buffer, size_t offset, uint32_t value) {
-
-        for(size_t i = 0; i < 4; i++) {
-            buffer[offset+i] = static_cast<std::byte>((value>>(8*i))&0xFFu);
-        }
-
-    }
-
-    void writeUint64(std::vector<std::byte>& buffer, size_t offset, uint64_t value) {
-
-        for(size_t i = 0; i < 8; i++) {
-            buffer[offset+i] = static_cast<std::byte>((value>>(8*i))&0xFFu);
-        }
-
-    }
-
-    void writeDouble(std::vector<std::byte>& buffer, size_t offset, double value) {
-
-        std::array<std::byte, 8> doubleBytes{};
-        std::memcpy(doubleBytes.data(), &value, doubleBytes.size());
-
-        for(size_t i = 0; i < doubleBytes.size(); i++) {
-            buffer[offset+i] = doubleBytes[i];
-        }
-
-    }
-
 }
 
 TEST_CASE("Codec encodes all logical types with alignment and little-endian bytes", "[record][codec]") {
@@ -95,9 +67,9 @@ TEST_CASE("Codec encodes all logical types with alignment and little-endian byte
     expected[1] = std::byte{0};
     expected[8] = std::byte{1};
     expected[9] = std::byte{249};
-    writeUint32(expected, 12, 0x01020304);
-    writeUint64(expected, 16, 0x0102030405060708);
-    writeDouble(expected, 24, 1.5);
+    dandb::core::helper::writeUint32(expected, 12, 0x01020304);
+    dandb::core::helper::writeUint64(expected, 16, 0x0102030405060708);
+    dandb::core::helper::writeDouble(expected, 24, 1.5);
     expected[32] = std::byte{'A'};
     expected[33] = std::byte{'n'};
     expected[34] = std::byte{'a'};
@@ -116,9 +88,9 @@ TEST_CASE("Codec decodes all logical types from fixed row bytes", "[record][code
     bytes[1] = std::byte{0};
     bytes[8] = std::byte{1};
     bytes[9] = std::byte{249};
-    writeUint32(bytes, 12, 0x01020304);
-    writeUint64(bytes, 16, 0x0102030405060708);
-    writeDouble(bytes, 24, 1.5);
+    dandb::core::helper::writeUint32(bytes, 12, 0x01020304);
+    dandb::core::helper::writeUint64(bytes, 16, 0x0102030405060708);
+    dandb::core::helper::writeDouble(bytes, 24, 1.5);
     bytes[32] = std::byte{'A'};
     bytes[33] = std::byte{'n'};
     bytes[34] = std::byte{'a'};

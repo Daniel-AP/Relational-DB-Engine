@@ -1,3 +1,4 @@
+#include <dandb/core/Helper.h>
 #include <dandb/storage/DiskManager.h>
 
 #include <catch2/catch_test_macros.hpp>
@@ -45,17 +46,12 @@ namespace {
         std::ifstream file(filePath, std::ios::binary);
         REQUIRE(file.is_open());
 
-        std::array<unsigned char, 4> bytes{};
+        std::array<std::byte, 4> bytes{};
         file.seekg(offset);
         file.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
         REQUIRE(file.gcount() == static_cast<std::streamsize>(bytes.size()));
 
-        const auto byte0 = static_cast<uint32_t>(bytes[0]);
-        const auto byte1 = static_cast<uint32_t>(bytes[1])<<8;
-        const auto byte2 = static_cast<uint32_t>(bytes[2])<<16;
-        const auto byte3 = static_cast<uint32_t>(bytes[3])<<24;
-
-        return byte0 | byte1 | byte2 | byte3;
+        return dandb::core::helper::readUint32(bytes, 0);
 
     }
 

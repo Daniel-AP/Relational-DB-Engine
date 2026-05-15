@@ -24,6 +24,7 @@ set(DANDB_LIBRARY_HEADERS
     include/dandb/core/Status.h
     include/dandb/core/Version.h
     include/dandb/core/Constants.h
+    include/dandb/core/Helper.h
     include/dandb/storage/DiskManager.h
     include/dandb/buffer/Page.h
     include/dandb/buffer/LRUReplacer.h

@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
-#include <span>
 
 namespace dandb {
     namespace storage {
@@ -37,9 +36,6 @@ namespace dandb {
                 [[nodiscard]] dandb::core::Status writeHeader(std::fstream& file);
                 [[nodiscard]] dandb::core::Status readPage(std::fstream& file, dandb::core::PageId pageId, std::array<std::byte, dandb::core::PAGE_SIZE_BYTES>& out);
                 [[nodiscard]] dandb::core::Status writePage(std::fstream& file, dandb::core::PageId pageId, const std::array<std::byte, dandb::core::PAGE_SIZE_BYTES>& data);
-
-                void writeUint32(std::span<std::byte> buffer, size_t offset, uint32_t value);
-                uint32_t readUint32(std::span<const std::byte> buffer, size_t offset);
         };
 
     }
