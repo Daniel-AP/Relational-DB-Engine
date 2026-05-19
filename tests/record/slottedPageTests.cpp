@@ -28,8 +28,8 @@ namespace {
 
     bool isZeroedFrom(const std::array<std::byte, dandb::core::PAGE_SIZE_BYTES>& page, size_t offset) {
 
-        for(size_t index = offset; index < page.size(); index++) {
-            if(page[index] != std::byte{0}) {
+        for(size_t i = offset; i < page.size(); i++) {
+            if(page[i] != std::byte{0}) {
                 return false;
             }
         }
@@ -205,7 +205,7 @@ TEST_CASE("SlottedPage delete marks the slot as a tombstone and preserves the ol
 
 }
 
-TEST_CASE("SlottedPage updates a row in place when the new payload is not larger", "[record][slotted-page]") {
+TEST_CASE("SlottedPage updates a row in place when the new payload has the same size", "[record][slotted-page]") {
 
     std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> pageBytes{};
     dandb::record::SlottedPage::initialize(pageBytes, 16);
@@ -214,7 +214,10 @@ TEST_CASE("SlottedPage updates a row in place when the new payload is not larger
     const auto slot = page.insertRow(bytes({ 1, 2, 3, 4 }));
     REQUIRE(slot.ok());
 
-    const auto updated = bytes({ 9, 8 });
+    const uint16_t freeStartBefore = page.freeStartOffset();
+    const uint16_t freeEndBefore = page.freeEndOffset();
+    const auto updated = bytes({ 9, 8, 7, 6 });
+
     const auto updateStatus = page.updateRow(slot.value(), updated);
     const auto stored = page.readRow(slot.value());
 
@@ -222,31 +225,34 @@ TEST_CASE("SlottedPage updates a row in place when the new payload is not larger
     REQUIRE(stored.ok());
     REQUIRE(stored.value() == updated);
     REQUIRE(dandb::core::helper::readUint16(pageBytes, 26) == updated.size());
+    REQUIRE(page.freeStartOffset() == freeStartBefore);
+    REQUIRE(page.freeEndOffset() == freeEndBefore);
 
 }
 
-TEST_CASE("SlottedPage updates a row with a larger payload when free space is available", "[record][slotted-page]") {
+TEST_CASE("SlottedPage rejects smaller update payloads and preserves the original row", "[record][slotted-page]") {
 
     std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> pageBytes{};
     dandb::record::SlottedPage::initialize(pageBytes, 17);
     dandb::record::SlottedPage page(pageBytes);
 
-    const auto firstSlot = page.insertRow(bytes({ 1, 1, 1 }));
-    const auto secondSlot = page.insertRow(bytes({ 2, 2, 2 }));
-    REQUIRE(firstSlot.ok());
-    REQUIRE(secondSlot.ok());
+    const auto original = bytes({ 1, 2, 3, 4 });
+    const auto slot = page.insertRow(original);
+    REQUIRE(slot.ok());
 
-    const auto larger = bytes({ 9, 9, 9, 9, 9, 9 });
-    const auto updateStatus = page.updateRow(firstSlot.value(), larger);
+    const auto before = pageBytes;
+    const auto smaller = bytes({ 9, 8 });
 
-    REQUIRE(updateStatus.ok());
-    REQUIRE(page.readRow(firstSlot.value()).value() == larger);
-    REQUIRE(page.readRow(secondSlot.value()).value() == bytes({ 2, 2, 2 }));
-    REQUIRE(dandb::core::helper::readUint16(pageBytes, 26) == larger.size());
+    const auto updateStatus = page.updateRow(slot.value(), smaller);
+
+    REQUIRE_FALSE(updateStatus.ok());
+    REQUIRE(updateStatus.code() == dandb::core::StatusCode::InvalidArgument);
+    REQUIRE(pageBytes == before);
+    REQUIRE(page.readRow(slot.value()).value() == original);
 
 }
 
-TEST_CASE("SlottedPage rejects an update that does not fit and preserves the original row", "[record][slotted-page]") {
+TEST_CASE("SlottedPage rejects larger update payloads and preserves the original row", "[record][slotted-page]") {
 
     std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> pageBytes{};
     dandb::record::SlottedPage::initialize(pageBytes, 18);
@@ -257,9 +263,9 @@ TEST_CASE("SlottedPage rejects an update that does not fit and preserves the ori
     REQUIRE(slot.ok());
 
     const auto before = pageBytes;
-    const std::vector<std::byte> tooLarge(dandb::core::PAGE_SIZE_BYTES, std::byte{0xEF});
+    const auto larger = bytes({ 9, 8, 7, 6, 5 });
 
-    const auto updateStatus = page.updateRow(slot.value(), tooLarge);
+    const auto updateStatus = page.updateRow(slot.value(), larger);
 
     REQUIRE_FALSE(updateStatus.ok());
     REQUIRE(updateStatus.code() == dandb::core::StatusCode::InvalidArgument);
