@@ -72,9 +72,9 @@ namespace {
 
         std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> page{};
 
-        for(size_t index = 0; index < page.size(); index++) {
-            page[index] = static_cast<std::byte>(
-                (static_cast<unsigned int>(seed)+static_cast<unsigned int>(index))%256
+        for(size_t i = 0; i < page.size(); i++) {
+            page[i] = static_cast<std::byte>(
+                (static_cast<unsigned int>(seed)+static_cast<unsigned int>(i))%256
             );
         }
 

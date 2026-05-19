@@ -1,7 +1,6 @@
 #include <dandb/buffer/Page.h>
 
 #include <string>
-#include <algorithm>
 
 namespace dandb {
     namespace buffer {
@@ -62,8 +61,7 @@ namespace dandb {
             id_ = dandb::core::INVALID_PAGE_ID;
             pinCount_ = 0;
             isDirty_ = false;
-            std::fill(data_.begin(), data_.end(), std::byte{0});
-
+            data_.fill(std::byte{0});
         }
 
     }
