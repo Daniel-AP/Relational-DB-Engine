@@ -4,6 +4,29 @@
 #include <fstream>
 #include <stdexcept>
 
+namespace {
+
+    constexpr size_t MAGIC_SIZE = 4;
+    constexpr dandb::core::PageId DISK_HEADER_PAGE_ID = 0;
+    constexpr dandb::core::PageId INITIAL_PAGE_COUNT = 1;
+    constexpr uint16_t FREE_PAGE_KIND = 0xFFFF;
+
+    constexpr size_t PAGE_ID_OFFSET = 0;
+    constexpr size_t PAGE_SIZE_OFFSET = 4;
+    constexpr size_t PAGE_KIND_OFFSET = 4;
+    constexpr size_t PAGE_COUNT_OFFSET = 8;
+    constexpr size_t NEXT_FREE_PAGE_ID_OFFSET = 8;
+    constexpr size_t FIRST_FREE_PAGE_ID_OFFSET = 12;
+    constexpr size_t FREE_PAGE_COUNT_OFFSET = 16;
+
+    std::streamoff pageFileOffset(dandb::core::PageId pageId) {
+
+        return static_cast<std::streamoff>(pageId)*static_cast<std::streamoff>(dandb::core::PAGE_SIZE_BYTES);
+
+    }
+
+}
+
 namespace dandb {
     namespace storage {
 
@@ -20,7 +43,7 @@ namespace dandb {
                     }
                 }
 
-                pageCount_ = 1;
+                pageCount_ = INITIAL_PAGE_COUNT;
                 firstFreePageId_ = dandb::core::INVALID_PAGE_ID;
                 freePageCount_ = 0;
 
@@ -75,12 +98,12 @@ namespace dandb {
                     return readStatus;
                 }
 
-                firstFreePageId_ = dandb::core::helper::readUint32(currentPage, 8);
+                firstFreePageId_ = dandb::core::helper::readUint32(currentPage, NEXT_FREE_PAGE_ID_OFFSET);
 
                 std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> newPage{};
 
                 file.clear();
-                file.seekp(1ULL*allocatedPageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
+                file.seekp(pageFileOffset(allocatedPageId), std::ios::beg);
                 file.write(reinterpret_cast<char*>(newPage.data()), dandb::core::PAGE_SIZE_BYTES);
                 file.flush();
 
@@ -117,7 +140,7 @@ namespace dandb {
                 std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> newPage{};
 
                 file.clear();
-                file.seekp(1ULL*allocatedPageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
+                file.seekp(pageFileOffset(allocatedPageId), std::ios::beg);
                 file.write(reinterpret_cast<char*>(newPage.data()), dandb::core::PAGE_SIZE_BYTES);
                 file.flush();
 
@@ -146,7 +169,7 @@ namespace dandb {
 
         dandb::core::Status DiskManager::freePage(dandb::core::PageId pageId) {
 
-            if(pageId == 0) {
+            if(pageId == DISK_HEADER_PAGE_ID) {
                 return dandb::core::Status::InvalidArgument("Cannot free page 0 from disk file '" + filePath_.string() + "': page 0 is reserved for the disk header");
             }
 
@@ -166,15 +189,15 @@ namespace dandb {
                 return readStatus;
             }
 
-            if(currentPage[4] == static_cast<std::byte>(0xFFu) && currentPage[5] == static_cast<std::byte>(0xFFu)) {
+            if(dandb::core::helper::readUint16(currentPage, PAGE_KIND_OFFSET) == FREE_PAGE_KIND) {
                 return dandb::core::Status::InvalidArgument("Unable to free page " + std::to_string(pageId) + ": page is already free");
             }
 
             std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> freedPage{};
 
-            dandb::core::helper::writeUint32(freedPage, 0, pageId);
-            freedPage[4] = freedPage[5] = static_cast<std::byte>(0xFFu);
-            dandb::core::helper::writeUint32(freedPage, 8, firstFreePageId_);
+            dandb::core::helper::writeUint32(freedPage, PAGE_ID_OFFSET, pageId);
+            dandb::core::helper::writeUint16(freedPage, PAGE_KIND_OFFSET, FREE_PAGE_KIND);
+            dandb::core::helper::writeUint32(freedPage, NEXT_FREE_PAGE_ID_OFFSET, firstFreePageId_);
 
             const auto previousFirstFreePageId = firstFreePageId_;
             const auto previousFreePageCount = freePageCount_;
@@ -208,7 +231,7 @@ namespace dandb {
 
         dandb::core::Status DiskManager::readPage(dandb::core::PageId pageId, std::array<std::byte, dandb::core::PAGE_SIZE_BYTES>& out) {
 
-            if(pageId == 0) {
+            if(pageId == DISK_HEADER_PAGE_ID) {
                 return dandb::core::Status::InvalidArgument("Cannot read page 0 from disk file '" + filePath_.string() + "': page 0 is reserved for the disk header");
             }
 
@@ -232,7 +255,7 @@ namespace dandb {
             }
 
             file.clear();
-            file.seekg(1ULL*pageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
+            file.seekg(pageFileOffset(pageId), std::ios::beg);
 
             std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> page{};
             file.read(reinterpret_cast<char*>(page.data()), dandb::core::PAGE_SIZE_BYTES);
@@ -249,7 +272,7 @@ namespace dandb {
 
         dandb::core::Status DiskManager::writePage(dandb::core::PageId pageId, const std::array<std::byte, dandb::core::PAGE_SIZE_BYTES>& data) {
 
-            if(pageId == 0) {
+            if(pageId == DISK_HEADER_PAGE_ID) {
                 return dandb::core::Status::InvalidArgument("Cannot write page 0 from disk file '" + filePath_.string() + "': page 0 is reserved for the disk header");
             }
 
@@ -269,7 +292,7 @@ namespace dandb {
                 return dandb::core::Status::IOError("Cannot write page in disk file '" + filePath_.string() + "': unable to read file");
             }
 
-            if(currentPage[4] == static_cast<std::byte>(0xFFu) && currentPage[5] == static_cast<std::byte>(0xFFu)) {
+            if(dandb::core::helper::readUint16(currentPage, PAGE_KIND_OFFSET) == FREE_PAGE_KIND) {
                 return dandb::core::Status::InvalidArgument("Unable to write page " + std::to_string(pageId) + ": page is free");
             }
 
@@ -284,7 +307,7 @@ namespace dandb {
             }
 
             file.clear();
-            file.seekp(1ULL*pageId*dandb::core::PAGE_SIZE_BYTES, std::ios::beg);
+            file.seekp(pageFileOffset(pageId), std::ios::beg);
             file.write(reinterpret_cast<const char*>(data.data()), dandb::core::PAGE_SIZE_BYTES);
             file.flush();
 
@@ -311,22 +334,22 @@ namespace dandb {
             std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> header{};
 
             file.clear();
-            file.seekg(0, std::ios::beg);
+            file.seekg(pageFileOffset(DISK_HEADER_PAGE_ID), std::ios::beg);
             file.read(reinterpret_cast<char*>(header.data()), dandb::core::PAGE_SIZE_BYTES);
 
             if(!file) {
                 return dandb::core::Status::IOError("Cannot read disk header from '" + filePath_.string() + "': stream read failed");
             }
 
-            for(size_t i = 0; i < 4; i++) {
+            for(size_t i = 0; i < MAGIC_SIZE; i++) {
                 if(header[i] != static_cast<std::byte>(magic_[i])) {
                     return dandb::core::Status::Corruption("Cannot read disk header from '" + filePath_.string() + "': invalid magic bytes");
                 }
             }
 
-            pageCount_ = dandb::core::helper::readUint32(header, 8);
-            firstFreePageId_ = dandb::core::helper::readUint32(header, 12);
-            freePageCount_ = dandb::core::helper::readUint32(header, 16);
+            pageCount_ = dandb::core::helper::readUint32(header, PAGE_COUNT_OFFSET);
+            firstFreePageId_ = dandb::core::helper::readUint32(header, FIRST_FREE_PAGE_ID_OFFSET);
+            freePageCount_ = dandb::core::helper::readUint32(header, FREE_PAGE_COUNT_OFFSET);
 
             return dandb::core::Status::Ok();
 
@@ -340,17 +363,17 @@ namespace dandb {
 
             std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> header{};
 
-            for(size_t i = 0; i < 4; i++) {
+            for(size_t i = 0; i < MAGIC_SIZE; i++) {
                 header[i] = static_cast<std::byte>(magic_[i]);
             }
 
-            dandb::core::helper::writeUint32(header, 4, dandb::core::PAGE_SIZE_BYTES);
-            dandb::core::helper::writeUint32(header, 8, pageCount_);
-            dandb::core::helper::writeUint32(header, 12, firstFreePageId_);
-            dandb::core::helper::writeUint32(header, 16, freePageCount_);
+            dandb::core::helper::writeUint32(header, PAGE_SIZE_OFFSET, dandb::core::PAGE_SIZE_BYTES);
+            dandb::core::helper::writeUint32(header, PAGE_COUNT_OFFSET, pageCount_);
+            dandb::core::helper::writeUint32(header, FIRST_FREE_PAGE_ID_OFFSET, firstFreePageId_);
+            dandb::core::helper::writeUint32(header, FREE_PAGE_COUNT_OFFSET, freePageCount_);
 
             file.clear();
-            file.seekp(0, std::ios::beg);
+            file.seekp(pageFileOffset(DISK_HEADER_PAGE_ID), std::ios::beg);
             file.write(reinterpret_cast<char*>(header.data()), dandb::core::PAGE_SIZE_BYTES);
             file.flush();
 
