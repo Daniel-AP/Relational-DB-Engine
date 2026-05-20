@@ -8,6 +8,7 @@ set(DANDB_TEST_SOURCES
     core/versionTests.cpp
     record/codecTests.cpp
     record/layoutTests.cpp
+    record/pagedTableTests.cpp
     record/slottedPageTests.cpp
     record/valueSchemaRowTests.cpp
     storage/diskManagerTests.cpp

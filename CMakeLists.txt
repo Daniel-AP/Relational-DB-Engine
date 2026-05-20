@@ -36,6 +36,7 @@ set(DANDB_LIBRARY_HEADERS
     include/dandb/record/Layout.h
     include/dandb/record/Codec.h
     include/dandb/record/SlottedPage.h
+    include/dandb/record/PagedTable.h
 )
 
 set(DANDB_LIBRARY_SOURCES
@@ -48,6 +49,7 @@ set(DANDB_LIBRARY_SOURCES
     src/record/Layout.cpp
     src/record/Codec.cpp
     src/record/SlottedPage.cpp
+    src/record/PagedTable.cpp
 )
 
 add_library(DanDBLib
