@@ -10,6 +10,7 @@ set(DANDB_TEST_SOURCES
     record/layoutTests.cpp
     record/pagedTableTests.cpp
     record/slottedPageTests.cpp
+    record/tableIteratorTests.cpp
     record/valueSchemaRowTests.cpp
     storage/diskManagerTests.cpp
 )
