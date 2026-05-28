@@ -4,6 +4,7 @@
 #include <dandb/buffer/Page.h>
 
 #include <vector>
+#include <string>
 
 namespace dandb {
     namespace record {
@@ -100,6 +101,110 @@ namespace dandb {
 
             return RID{newPageId, insertSlotId};
 
+        }
+
+        dandb::core::Result<Row> PagedTable::readRow(const RID& rid) {
+
+            const auto fetchPageResult = bpm_.fetchPage(rid.pageId);
+            if(!fetchPageResult.ok()) {
+                return fetchPageResult.status();
+            }
+
+            dandb::buffer::Page* page = fetchPageResult.value();
+            dandb::record::SlottedPage slottedPage(page->data());
+
+            const auto readRowResult = slottedPage.readRow(rid.slotId);
+            if(!readRowResult.ok()) {
+                const auto unpinStatus = bpm_.unpinPage(page->pageId(), false);
+                if(!unpinStatus.ok()) {
+                    return unpinStatus;
+                }
+                return readRowResult.status();
+            }
+
+            const auto unpinStatus = bpm_.unpinPage(page->pageId(), false);
+            if(!unpinStatus.ok()) {
+                return unpinStatus;
+            }
+
+            std::vector<std::byte> rawRow = readRowResult.value();
+            const auto decodeRowResult = dandb::record::Codec::decode(schema_, rawRow);
+            if(!decodeRowResult.ok()) {
+                return decodeRowResult.status();
+            }
+
+            return decodeRowResult.value();
+
+        }
+
+        dandb::core::Status PagedTable::deleteRow(const RID& rid) {
+
+            const auto fetchPageResult = bpm_.fetchPage(rid.pageId);
+            if(!fetchPageResult.ok()) {
+                return fetchPageResult.status();
+            }
+
+            dandb::buffer::Page* page = fetchPageResult.value();
+            dandb::record::SlottedPage slottedPage(page->data());
+
+            const auto deleteRowStatus = slottedPage.deleteRow(rid.slotId);
+            if(!deleteRowStatus.ok()) {
+                const auto unpinStatus = bpm_.unpinPage(page->pageId(), false);
+                if(!unpinStatus.ok()) {
+                    return unpinStatus;
+                }
+                return deleteRowStatus;
+            }
+
+            const auto unpinStatus = bpm_.unpinPage(page->pageId(), true);
+            if(!unpinStatus.ok()) {
+                return unpinStatus;
+            }
+
+            return dandb::core::Status::Ok();
+
+        }
+
+        dandb::core::Status PagedTable::updateRow(const RID& rid, const Row& row) {
+
+            const auto encodedRowResult = dandb::record::Codec::encode(schema_, row);
+            if(!encodedRowResult.ok()) {
+                return encodedRowResult.status();
+            }
+
+            const auto fetchPageResult = bpm_.fetchPage(rid.pageId);
+            if(!fetchPageResult.ok()) {
+                return fetchPageResult.status();
+            }
+
+            dandb::buffer::Page* page = fetchPageResult.value();
+            dandb::record::SlottedPage slottedPage(page->data());
+
+            std::vector<std::byte> encodedRow = encodedRowResult.value();
+            const auto updateStatus = slottedPage.updateRow(rid.slotId, encodedRow);
+            if(!updateStatus.ok()) {
+                const auto unpinStatus = bpm_.unpinPage(page->pageId(), false);
+                if(!unpinStatus.ok()) {
+                    return unpinStatus;
+                }
+                return updateStatus;
+            }
+
+            const auto unpinStatus = bpm_.unpinPage(page->pageId(), true);
+            if(!unpinStatus.ok()) {
+                return unpinStatus;
+            }
+
+            return dandb::core::Status::Ok();
+
+        }
+
+        dandb::core::PageId PagedTable::firstPageId() const {
+            return firstPageId_;
+        }
+
+        dandb::core::PageId PagedTable::lastPageId() const {
+            return lastPageId_;
         }
 
     }
