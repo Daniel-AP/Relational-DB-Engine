@@ -9,6 +9,7 @@ set(DANDB_TEST_SOURCES
     record/codecTests.cpp
     record/layoutTests.cpp
     record/pagedTableTests.cpp
+    record/recordLayerIntegrationTests.cpp
     record/slottedPageTests.cpp
     record/tableIteratorTests.cpp
     record/valueSchemaRowTests.cpp
