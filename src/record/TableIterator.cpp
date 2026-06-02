@@ -2,6 +2,10 @@
 #include <dandb/record/SlottedPage.h>
 #include <dandb/record/Codec.h>
 
+#include <cstddef>
+#include <utility>
+#include <vector>
+
 namespace dandb {
     namespace record {
 

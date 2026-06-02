@@ -8,7 +8,6 @@
 #include <dandb/record/Row.h>
 
 #include <optional>
-#include <utility>
 
 namespace dandb {
     namespace record {

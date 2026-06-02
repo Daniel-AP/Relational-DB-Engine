@@ -4,7 +4,6 @@
 #include <dandb/buffer/Page.h>
 
 #include <vector>
-#include <string>
 #include <utility>
 
 namespace dandb {

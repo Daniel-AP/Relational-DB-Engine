@@ -3,6 +3,7 @@
 #include <dandb/record/Layout.h>
 
 #include <cstring>
+#include <string>
 #include <utility>
 
 namespace dandb {
