@@ -22,6 +22,11 @@ namespace dandb {
                     dandb::core::PageId lastPageId
                 );
 
+                PagedTable(const PagedTable&) = delete;
+                PagedTable& operator=(const PagedTable&) = delete;
+                PagedTable(PagedTable&&) = delete;
+                PagedTable& operator=(PagedTable&&) = delete;
+
                 [[nodiscard]] dandb::core::Result<RID> insertRow(const Row& row);
                 [[nodiscard]] dandb::core::Result<Row> readRow(const RID& rid);
                 [[nodiscard]] dandb::core::Status deleteRow(const RID& rid);

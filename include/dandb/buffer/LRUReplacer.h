@@ -14,7 +14,11 @@ namespace dandb {
 
             public:
                 explicit LRUReplacer(size_t capacity);
-                
+                LRUReplacer(const LRUReplacer&) = delete;
+                LRUReplacer& operator=(const LRUReplacer&) = delete;
+                LRUReplacer(LRUReplacer&&) = delete;
+                LRUReplacer& operator=(LRUReplacer&&) = delete;
+
                 size_t capacity() const;
                 size_t size() const;
 

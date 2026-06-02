@@ -31,7 +31,7 @@ namespace dandb {
     namespace storage {
 
         DiskManager::DiskManager(std::filesystem::path filePath, std::array<char, 4> magic)
-            : filePath_(filePath), magic_(magic) {
+            : filePath_(std::move(filePath)), magic_(magic) {
 
             if(!std::filesystem::exists(filePath_)) {
 

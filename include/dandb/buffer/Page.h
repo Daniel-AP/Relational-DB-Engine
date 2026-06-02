@@ -14,6 +14,10 @@ namespace dandb {
 
             public:
                 Page();
+                Page(const Page&) = delete;
+                Page& operator=(const Page&) = delete;
+                Page(Page&&) = delete;
+                Page& operator=(Page&&) = delete;
 
                 dandb::core::PageId pageId() const;
                 void setPageId(dandb::core::PageId id);

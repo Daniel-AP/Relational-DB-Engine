@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 
 namespace dandb {
     namespace core {
@@ -23,39 +24,39 @@ namespace dandb {
 
                 }
 
-                static Status InvalidArgument(const std::string& message) {
+                static Status InvalidArgument(std::string message) {
 
-                    return Status(StatusCode::InvalidArgument, message);
-
-                }
-
-                static Status NotFound(const std::string& message) {
-
-                    return Status(StatusCode::NotFound, message);
+                    return Status(StatusCode::InvalidArgument, std::move(message));
 
                 }
 
-                static Status AlreadyExists(const std::string& message) {
+                static Status NotFound(std::string message) {
 
-                    return Status(StatusCode::AlreadyExists, message);
-
-                }
-
-                static Status IOError(const std::string& message) {
-
-                    return Status(StatusCode::IOError, message);
+                    return Status(StatusCode::NotFound, std::move(message));
 
                 }
 
-                static Status Corruption(const std::string& message) {
+                static Status AlreadyExists(std::string message) {
 
-                    return Status(StatusCode::Corruption, message);
+                    return Status(StatusCode::AlreadyExists, std::move(message));
 
                 }
 
-                static Status Internal(const std::string& message) {
+                static Status IOError(std::string message) {
 
-                    return Status(StatusCode::Internal, message);
+                    return Status(StatusCode::IOError, std::move(message));
+
+                }
+
+                static Status Corruption(std::string message) {
+
+                    return Status(StatusCode::Corruption, std::move(message));
+
+                }
+
+                static Status Internal(std::string message) {
+
+                    return Status(StatusCode::Internal, std::move(message));
 
                 }
 
@@ -78,8 +79,8 @@ namespace dandb {
                 }
 
             private:
-                Status(StatusCode code, const std::string& message)
-                    : code_(code), message_(message) {
+                Status(StatusCode code, std::string message)
+                    : code_(code), message_(std::move(message)) {
 
                 }
 
