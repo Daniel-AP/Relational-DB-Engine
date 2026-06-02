@@ -37,6 +37,7 @@ set(DANDB_LIBRARY_HEADERS
     include/dandb/record/Codec.h
     include/dandb/record/SlottedPage.h
     include/dandb/record/PagedTable.h
+    include/dandb/record/TableIterator.h
 )
 
 set(DANDB_LIBRARY_SOURCES
@@ -50,6 +51,7 @@ set(DANDB_LIBRARY_SOURCES
     src/record/Codec.cpp
     src/record/SlottedPage.cpp
     src/record/PagedTable.cpp
+    src/record/TableIterator.cpp
 )
 
 add_library(DanDBLib

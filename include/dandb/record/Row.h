@@ -12,9 +12,8 @@ namespace dandb {
         class Row {
             public:
                 explicit Row(std::vector<Value> values)
-                    : values_(std::move(values)) {
-
-                }
+                    : values_(std::move(values))
+                {}
 
                 size_t valueCount() const {
                     return values_.size();
