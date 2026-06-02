@@ -16,19 +16,19 @@ namespace dandb {
             dandb::core::PageId lastPageId
         ) : 
             bpm_(bpm),
-            schema_(schema),
+            schema_(std::move(schema)),
             firstPageId_(firstPageId),
             lastPageId_(lastPageId)
         {}
 
         dandb::core::Result<RID> PagedTable::insertRow(const Row& row) {
 
-            const auto encodedRowResult = dandb::record::Codec::encode(schema_, row);
+            auto encodedRowResult = dandb::record::Codec::encode(schema_, row);
             if(!encodedRowResult.ok()) {
                 return encodedRowResult.status();
             }
 
-            std::vector<std::byte> encodedRow = encodedRowResult.value();
+            std::vector<std::byte> encodedRow = std::move(encodedRowResult.value());
             const dandb::core::PageId oldLastPageId = lastPageId_;
 
             const auto lastPageResult = bpm_.fetchPage(oldLastPageId);
@@ -113,7 +113,7 @@ namespace dandb {
             dandb::buffer::Page* page = fetchPageResult.value();
             dandb::record::SlottedPage slottedPage(page->data());
 
-            const auto readRowResult = slottedPage.readRow(rid.slotId);
+            auto readRowResult = slottedPage.readRow(rid.slotId);
             if(!readRowResult.ok()) {
                 const auto unpinStatus = bpm_.unpinPage(page->pageId(), false);
                 if(!unpinStatus.ok()) {
@@ -127,13 +127,13 @@ namespace dandb {
                 return unpinStatus;
             }
 
-            std::vector<std::byte> rawRow = readRowResult.value();
-            const auto decodeRowResult = dandb::record::Codec::decode(schema_, rawRow);
+            std::vector<std::byte> rawRow = std::move(readRowResult.value());
+            auto decodeRowResult = dandb::record::Codec::decode(schema_, rawRow);
             if(!decodeRowResult.ok()) {
                 return decodeRowResult.status();
             }
 
-            return decodeRowResult.value();
+            return std::move(decodeRowResult.value());
 
         }
 
@@ -167,7 +167,7 @@ namespace dandb {
 
         dandb::core::Status PagedTable::updateRow(const RID& rid, const Row& row) {
 
-            const auto encodedRowResult = dandb::record::Codec::encode(schema_, row);
+            auto encodedRowResult = dandb::record::Codec::encode(schema_, row);
             if(!encodedRowResult.ok()) {
                 return encodedRowResult.status();
             }
@@ -180,7 +180,7 @@ namespace dandb {
             dandb::buffer::Page* page = fetchPageResult.value();
             dandb::record::SlottedPage slottedPage(page->data());
 
-            std::vector<std::byte> encodedRow = encodedRowResult.value();
+            std::vector<std::byte> encodedRow = std::move(encodedRowResult.value());
             const auto updateStatus = slottedPage.updateRow(rid.slotId, encodedRow);
             if(!updateStatus.ok()) {
                 const auto unpinStatus = bpm_.unpinPage(page->pageId(), false);

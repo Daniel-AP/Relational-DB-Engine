@@ -93,7 +93,7 @@ namespace dandb {
                 Value(LogicalType type, bool isNull, Payload payload)
                     : type_(type),
                       isNull_(isNull),
-                      payload_(payload) {
+                      payload_(std::move(payload)) {
 
                 }
 

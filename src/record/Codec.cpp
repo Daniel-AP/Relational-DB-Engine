@@ -82,7 +82,7 @@ namespace dandb {
                         dandb::core::helper::writeDouble(encoded, offset, val.asDouble());
                         break;
                     case LogicalType::String:
-                        std::string stringValue = val.asString();
+                        const std::string& stringValue = val.asString();
                         std::memcpy(encoded.data()+offset, stringValue.data(), stringValue.size());
                         break;
                 }
@@ -188,7 +188,7 @@ namespace dandb {
                             if(ch == '\0') break;
                             stringValue += ch;
                         }
-                        values.push_back(Value::string(stringValue));
+                        values.push_back(Value::string(std::move(stringValue)));
                         break;
                     }
                 }

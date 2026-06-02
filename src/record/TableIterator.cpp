@@ -19,7 +19,7 @@ namespace dandb {
 
             if(cachedEntry_.has_value()) return true;
 
-            const auto loadNextResult = loadNext();
+            auto loadNextResult = loadNext();
 
             if(!loadNextResult.ok()) {
                 if(loadNextResult.status().code() == dandb::core::StatusCode::NotFound) {
@@ -29,7 +29,7 @@ namespace dandb {
                 }
             }
 
-            cachedEntry_ = loadNextResult.value();
+            cachedEntry_ = std::move(loadNextResult.value());
 
             return true;
             
@@ -46,7 +46,7 @@ namespace dandb {
                 return dandb::core::Status::NotFound("Cannot load next table row: iterator is exhausted");
             }
 
-            TableIteratorEntry entry = *cachedEntry_;
+            TableIteratorEntry entry = std::move(*cachedEntry_);
             cachedEntry_.reset();
 
             return entry;
@@ -76,7 +76,7 @@ namespace dandb {
                     continue;
                 }
 
-                const auto readRowResult = slottedPage.readRow(nextSlotId_);
+                auto readRowResult = slottedPage.readRow(nextSlotId_);
 
                 if(!readRowResult.ok()) {
                     if(readRowResult.status().code() != dandb::core::StatusCode::NotFound) {
@@ -95,8 +95,8 @@ namespace dandb {
                     continue;
                 }
 
-                const std::vector<std::byte> rawRow = readRowResult.value();
-                const auto decodedRowResult = dandb::record::Codec::decode(schema_, rawRow);
+                const std::vector<std::byte> rawRow = std::move(readRowResult.value());
+                auto decodedRowResult = dandb::record::Codec::decode(schema_, rawRow);
                 if(!decodedRowResult.ok()) {
                     const auto unpinStatus = bpm_.unpinPage(page->pageId(), false);
                     if(!unpinStatus.ok()) {
@@ -105,7 +105,7 @@ namespace dandb {
                     return decodedRowResult.status();
                 }
 
-                const Row row = decodedRowResult.value();
+                Row row = std::move(decodedRowResult.value());
 
                 const auto unpinStatus = bpm_.unpinPage(page->pageId(), false);
                 if(!unpinStatus.ok()) {
@@ -114,7 +114,7 @@ namespace dandb {
                 
                 return TableIteratorEntry{
                     RID{nextPageId_, nextSlotId_++},
-                    row
+                    std::move(row)
                 };
 
             }

@@ -8,7 +8,7 @@ namespace dandb {
     namespace record {
 
         Schema::Schema(std::vector<Column> columns)
-            : columns_(columns)
+            : columns_(std::move(columns))
         {}
 
         dandb::core::Result<Schema> Schema::create(std::vector<Column> columns) {

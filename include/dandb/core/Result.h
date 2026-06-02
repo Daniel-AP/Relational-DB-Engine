@@ -1,8 +1,10 @@
 #pragma once
 
 #include <dandb/core/Status.h>
+
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <type_traits>
 
 namespace dandb {
@@ -18,7 +20,7 @@ namespace dandb {
 
             public:
                 Result(T value)
-                    : status_(Status::Ok()), value_(value) {
+                    : status_(Status::Ok()), value_(std::move(value)) {
 
                 }
 
