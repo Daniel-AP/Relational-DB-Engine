@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <string>
+#include <utility>
 
 namespace dandb {
     namespace record {

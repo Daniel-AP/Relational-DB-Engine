@@ -7,11 +7,11 @@ namespace dandb {
 
         TableIterator::TableIterator(
             dandb::buffer::BufferPoolManager& bpm,
-            const dandb::record::Schema& schema,
+            dandb::record::Schema schema,
             dandb::core::PageId firstPageId
         ) :
             bpm_(bpm),
-            schema_(schema),
+            schema_(std::move(schema)),
             nextPageId_(firstPageId)
         {}
 

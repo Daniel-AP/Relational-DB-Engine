@@ -25,7 +25,7 @@ namespace dandb {
                 }
 
                 Result(Status status)
-                    : status_(status), value_(std::nullopt) {
+                    : status_(std::move(status)), value_(std::nullopt) {
 
                     if(status.ok()) {
                         throw std::invalid_argument("Status must not be Ok");

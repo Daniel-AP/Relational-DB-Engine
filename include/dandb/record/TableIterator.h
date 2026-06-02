@@ -23,7 +23,7 @@ namespace dandb {
             public:
                 TableIterator(
                     dandb::buffer::BufferPoolManager& bpm,
-                    const dandb::record::Schema& schema,
+                    dandb::record::Schema schema,
                     dandb::core::PageId firstPageId
                 );
 
