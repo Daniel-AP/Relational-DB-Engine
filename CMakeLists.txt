@@ -38,6 +38,7 @@ set(DANDB_LIBRARY_HEADERS
     include/dandb/record/SlottedPage.h
     include/dandb/record/PagedTable.h
     include/dandb/record/TableIterator.h
+    include/dandb/catalog/TableManager.h
 )
 
 set(DANDB_LIBRARY_SOURCES
