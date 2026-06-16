@@ -75,7 +75,6 @@ namespace {
         uint32_t tableId;
         dandb::core::PageId firstPageId;
         dandb::core::PageId lastPageId;
-        uint64_t liveRowCount;
         uint8_t columnCount;
         std::string name;
         std::vector<ParsedColumn> columns;
@@ -171,24 +170,22 @@ namespace {
         size_t offset = 16;
 
         for(uint32_t i = 0; i < meta.tableCount; i++) {
-            REQUIRE(offset+28 <= bytes.size());
+            REQUIRE(offset+16 <= bytes.size());
 
             ParsedTable table{
                 dandb::core::helper::readUint32(bytes, offset),
                 dandb::core::helper::readUint32(bytes, offset+4),
                 dandb::core::helper::readUint32(bytes, offset+8),
-                dandb::core::helper::readUint64(bytes, offset+16),
-                std::to_integer<uint8_t>(bytes[offset+24]),
+                std::to_integer<uint8_t>(bytes[offset+12]),
                 "",
                 {}
             };
 
-            REQUIRE(dandb::core::helper::readUint32(bytes, offset+12) == 0);
-            REQUIRE(bytes[offset+25] == std::byte{0});
-            REQUIRE(bytes[offset+26] == std::byte{0});
-            REQUIRE(bytes[offset+27] == std::byte{0});
+            REQUIRE(bytes[offset+13] == std::byte{0});
+            REQUIRE(bytes[offset+14] == std::byte{0});
+            REQUIRE(bytes[offset+15] == std::byte{0});
 
-            offset += 28;
+            offset += 16;
             table.name = readText(bytes, offset);
 
             for(uint8_t j = 0; j < table.columnCount; j++) {
@@ -339,7 +336,6 @@ TEST_CASE("TableManager createTable persists schema metadata and initializes the
     REQUIRE(table.name == "users");
     REQUIRE(table.firstPageId == dandb::core::FIRST_ALLOCATABLE_PAGE_ID);
     REQUIRE(table.lastPageId == table.firstPageId);
-    REQUIRE(table.liveRowCount == 0);
     REQUIRE(table.columnCount == 3);
     REQUIRE(table.columns.size() == 3);
     requireColumn(table.columns[0], "id", TYPE_INT32, FLAG_PRIMARY_KEY, 0);
@@ -435,7 +431,7 @@ TEST_CASE("TableManager operations return NotFound for missing tables", "[catalo
 
 }
 
-TEST_CASE("TableManager inserts rows, persists row count, and reloads metadata after restart", "[catalog][table-manager]") {
+TEST_CASE("TableManager inserts rows and reloads metadata after restart", "[catalog][table-manager]") {
 
     const TempDir tempDir("reload_inserted_row");
     const auto tablesMetaPath = tempDir.path()/"tables.meta";
@@ -457,7 +453,6 @@ TEST_CASE("TableManager inserts rows, persists row count, and reloads metadata a
 
         const auto meta = readTablesMeta(tablesMetaPath);
         REQUIRE(meta.tableCount == 1);
-        REQUIRE(meta.tables[0].liveRowCount == 1);
         REQUIRE(meta.tables[0].lastPageId == meta.tables[0].firstPageId);
 
         REQUIRE(bufferPool.saveAllPagesToDisk().ok());
@@ -528,7 +523,6 @@ TEST_CASE("TableManager persists the new last page id when inserts grow a table"
     REQUIRE(meta.tableCount == 1);
     REQUIRE(meta.tables[0].firstPageId == firstPageId);
     REQUIRE(meta.tables[0].lastPageId == rids.back().pageId);
-    REQUIRE(meta.tables[0].liveRowCount == rids.size());
 
     const auto firstPageResult = bufferPool.fetchPage(firstPageId);
     REQUIRE(firstPageResult.ok());
@@ -539,7 +533,7 @@ TEST_CASE("TableManager persists the new last page id when inserts grow a table"
 
 }
 
-TEST_CASE("TableManager delegates update delete and scan while persisting live row count", "[catalog][table-manager]") {
+TEST_CASE("TableManager delegates update delete and scan", "[catalog][table-manager]") {
 
     const TempDir tempDir("mutate_rows");
     const auto tablesMetaPath = tempDir.path()/"tables.meta";
@@ -569,9 +563,6 @@ TEST_CASE("TableManager delegates update delete and scan while persisting live r
         const auto deleted = manager.value().readRow("users", deletedRid);
         REQUIRE_FALSE(deleted.ok());
         REQUIRE(deleted.status().code() == dandb::core::StatusCode::NotFound);
-
-        const auto meta = readTablesMeta(tablesMetaPath);
-        REQUIRE(meta.tables[0].liveRowCount == 1);
 
         REQUIRE(bufferPool.saveAllPagesToDisk().ok());
     }

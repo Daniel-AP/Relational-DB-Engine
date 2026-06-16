@@ -26,14 +26,13 @@ namespace dandb {
             dandb::record::Schema schema;
             dandb::core::PageId firstPageId;
             dandb::core::PageId lastPageId;
-            uint64_t liveRowCount;
         };
 
         class TableManager {
             public:
                 TableManager(const TableManager&) = delete;
                 TableManager& operator=(const TableManager&) = delete;
-                TableManager(TableManager&&) = delete;
+                TableManager(TableManager&&) = default;
                 TableManager& operator=(TableManager&&) = delete;
 
                 static dandb::core::Result<TableManager> open(std::filesystem::path tablesMetaPath, dandb::buffer::BufferPoolManager& bpm);
@@ -53,7 +52,7 @@ namespace dandb {
 
                 std::filesystem::path tablesMetaPath_;
                 dandb::buffer::BufferPoolManager& bpm_;
-                uint32_t nextTableId_;
+                uint32_t nextTableId_ = 1;
                 std::vector<TableMetadata> tableMetadata_;
                 std::unordered_map<std::string, size_t> tableMetadataIndex_;
         };

@@ -53,6 +53,7 @@ set(DANDB_LIBRARY_SOURCES
     src/record/SlottedPage.cpp
     src/record/PagedTable.cpp
     src/record/TableIterator.cpp
+    src/catalog/TableManager.cpp
 )
 
 add_library(DanDBLib

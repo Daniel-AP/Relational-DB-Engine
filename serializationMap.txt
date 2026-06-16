@@ -114,11 +114,9 @@ databases/<database name>/tables.meta
             offset + 0, 4 bytes: table id
             offset + 4, 4 bytes: first table page id
             offset + 8, 4 bytes: last table page id
-            offset + 12, 4 bytes: padding
-            offset + 16, 8 bytes: live row count
-            offset + 24, 1 byte: column count
-            offset + 25, 3 bytes: padding
-            offset + 28:
+            offset + 12, 1 byte: column count
+            offset + 13, 3 bytes: padding
+            offset + 16:
                 2 bytes: table name byte length
                 table name byte length bytes: table name UTF-8 bytes
                 padding bytes: align next offset to 4

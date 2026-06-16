@@ -36,6 +36,10 @@ namespace dandb {
                     seenNames.insert(col.name);
                 }
 
+                if(col.name.size() > 0xFFFFu) {
+                    return dandb::core::Status::InvalidArgument("Cannot create schema: column names must be at most "+std::to_string(0xFFFFu)+" bytes");
+                }
+
                 if(col.primaryKey) {
                     if(pk) {
                         return dandb::core::Status::InvalidArgument("Cannot create schema with more than 1 primary key");
