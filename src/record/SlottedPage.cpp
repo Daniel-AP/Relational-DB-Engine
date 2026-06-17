@@ -136,7 +136,7 @@ namespace dandb {
         dandb::core::Status SlottedPage::updateRow(dandb::core::SlotId slotId, std::span<const std::byte> payload) {
 
             if(slotId >= slotCount()) {
-                return dandb::core::Status::InvalidArgument("Cannot udpate row : "+std::to_string(slotId)+" is not a valid slot id");
+                return dandb::core::Status::InvalidArgument("Cannot update row : "+std::to_string(slotId)+" is not a valid slot id");
             }
 
             uint16_t offset = slotOffset(slotId);
@@ -145,6 +145,13 @@ namespace dandb {
 
             if(rowSize == 0) {
                 return dandb::core::Status::NotFound("Cannot update row: slot "+std::to_string(slotId)+" no longer contains a row");
+            }
+
+            const size_t rowStart = rowOffset;
+            const size_t rowEnd = rowStart+rowSize;
+
+            if(rowEnd > dandb::core::PAGE_SIZE_BYTES || rowStart < freeEndOffset()) {
+                return dandb::core::Status::Corruption("Cannot update row: slot "+std::to_string(slotId)+" has corrupt row bounds");
             }
 
             size_t payloadSize = payload.size();

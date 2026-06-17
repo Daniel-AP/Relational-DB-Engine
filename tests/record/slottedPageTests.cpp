@@ -274,6 +274,28 @@ TEST_CASE("SlottedPage rejects larger update payloads and preserves the original
 
 }
 
+TEST_CASE("SlottedPage rejects updates when the slot row bounds are corrupt", "[record][slotted-page]") {
+
+    std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> pageBytes{};
+    dandb::record::SlottedPage::initialize(pageBytes, 20);
+    dandb::record::SlottedPage page(pageBytes);
+
+    const auto original = bytes({ 1, 2, 3, 4 });
+    const auto slot = page.insertRow(original);
+    REQUIRE(slot.ok());
+
+    dandb::core::helper::writeUint16(pageBytes, 24, dandb::core::PAGE_SIZE_BYTES-2);
+    const auto corrupted = pageBytes;
+
+    const auto updateStatus = page.updateRow(slot.value(), bytes({ 9, 8, 7, 6 }));
+
+    REQUIRE_FALSE(updateStatus.ok());
+    REQUIRE(updateStatus.code() == dandb::core::StatusCode::Corruption);
+    REQUIRE_FALSE(updateStatus.message().empty());
+    REQUIRE(pageBytes == corrupted);
+
+}
+
 TEST_CASE("SlottedPage stores and updates the next table page id", "[record][slotted-page]") {
 
     std::array<std::byte, dandb::core::PAGE_SIZE_BYTES> pageBytes{};
