@@ -30,6 +30,7 @@ set(DANDB_LIBRARY_HEADERS
     include/dandb/buffer/LRUReplacer.h
     include/dandb/buffer/BufferPoolManager.h
     include/dandb/record/RID.h
+    include/dandb/record/LogicalType.h
     include/dandb/record/Value.h
     include/dandb/record/Row.h
     include/dandb/record/Schema.h

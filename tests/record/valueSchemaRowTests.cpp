@@ -1,9 +1,12 @@
+#include <dandb/core/Status.h>
+#include <dandb/record/LogicalType.h>
 #include <dandb/record/Row.h>
 #include <dandb/record/Schema.h>
 #include <dandb/record/Value.h>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -39,6 +42,46 @@ TEST_CASE("Value factories store type, nullness, and payload", "[record][value]"
 
     REQUIRE(missingName.type() == dandb::record::LogicalType::String);
     REQUIRE(missingName.isNull());
+
+}
+
+TEST_CASE("LogicalType converts to and from serialization codes", "[record][logical-type]") {
+
+    REQUIRE(dandb::record::logicalTypeCode(dandb::record::LogicalType::Boolean) == 0x01);
+    REQUIRE(dandb::record::logicalTypeCode(dandb::record::LogicalType::Byte) == 0x02);
+    REQUIRE(dandb::record::logicalTypeCode(dandb::record::LogicalType::Int32) == 0x03);
+    REQUIRE(dandb::record::logicalTypeCode(dandb::record::LogicalType::Int64) == 0x04);
+    REQUIRE(dandb::record::logicalTypeCode(dandb::record::LogicalType::Double) == 0x05);
+    REQUIRE(dandb::record::logicalTypeCode(dandb::record::LogicalType::String) == 0x06);
+
+    const auto booleanType = dandb::record::logicalTypeFromCode(std::byte{0x01});
+    const auto byteType = dandb::record::logicalTypeFromCode(std::byte{0x02});
+    const auto int32Type = dandb::record::logicalTypeFromCode(std::byte{0x03});
+    const auto int64Type = dandb::record::logicalTypeFromCode(std::byte{0x04});
+    const auto doubleType = dandb::record::logicalTypeFromCode(std::byte{0x05});
+    const auto stringType = dandb::record::logicalTypeFromCode(std::byte{0x06});
+
+    REQUIRE(booleanType.ok());
+    REQUIRE(byteType.ok());
+    REQUIRE(int32Type.ok());
+    REQUIRE(int64Type.ok());
+    REQUIRE(doubleType.ok());
+    REQUIRE(stringType.ok());
+    REQUIRE(booleanType.value() == dandb::record::LogicalType::Boolean);
+    REQUIRE(byteType.value() == dandb::record::LogicalType::Byte);
+    REQUIRE(int32Type.value() == dandb::record::LogicalType::Int32);
+    REQUIRE(int64Type.value() == dandb::record::LogicalType::Int64);
+    REQUIRE(doubleType.value() == dandb::record::LogicalType::Double);
+    REQUIRE(stringType.value() == dandb::record::LogicalType::String);
+
+}
+
+TEST_CASE("LogicalType rejects unknown serialization codes", "[record][logical-type]") {
+
+    const auto decoded = dandb::record::logicalTypeFromCode(std::byte{0x00});
+
+    REQUIRE_FALSE(decoded.ok());
+    REQUIRE(decoded.status().code() == dandb::core::StatusCode::Corruption);
 
 }
 

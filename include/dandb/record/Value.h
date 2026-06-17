@@ -1,5 +1,7 @@
 #pragma once
 
+#include <dandb/record/LogicalType.h>
+
 #include <cstdint>
 #include <string>
 #include <variant>
@@ -7,15 +9,6 @@
 
 namespace dandb {
     namespace record {
-
-        enum class LogicalType {
-            Boolean,
-            Byte,
-            Int32,
-            Int64,
-            Double,
-            String
-        };
 
         class Value {
             public:

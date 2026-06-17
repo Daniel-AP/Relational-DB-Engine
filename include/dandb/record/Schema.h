@@ -1,7 +1,7 @@
 #pragma once
 
 #include <dandb/core/Result.h>
-#include <dandb/record/Value.h>
+#include <dandb/record/LogicalType.h>
 
 #include <cstddef>
 #include <cstdint>
