@@ -48,13 +48,18 @@ namespace dandb {
                     : tablesMetaPath_(std::move(tablesMetaPath)), bpm_(bpm)
                 {}
                 dandb::core::Status load();
+                dandb::core::Status initMetaFile() const;
+                dandb::core::Result<TableMetadata> readTable(const std::vector<std::byte>& fileBytes, size_t& offset) const;
+                dandb::core::Result<dandb::record::Column> readColumn(const std::vector<std::byte>& fileBytes, size_t& offset) const;
+
                 dandb::core::Status save() const;
+                size_t serializedSize() const;
 
                 std::filesystem::path tablesMetaPath_;
                 dandb::buffer::BufferPoolManager& bpm_;
                 uint32_t nextTableId_ = 1;
-                std::vector<TableMetadata> tableMetadata_;
-                std::unordered_map<std::string, size_t> tableMetadataIndex_;
+                std::vector<TableMetadata> tablesMetadata_;
+                std::unordered_map<std::string, size_t> tableNameToMetadataIndex_;
         };
 
     }
