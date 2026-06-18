@@ -96,7 +96,7 @@ namespace dandb {
         dandb::core::Result<std::vector<std::byte>> SlottedPage::readRow(dandb::core::SlotId slotId) {
 
             if(slotId >= slotCount()) {
-                return dandb::core::Status::InvalidArgument("Cannot read row with : "+std::to_string(slotId)+" is not a valid slot id");
+                return dandb::core::Status::InvalidArgument("Cannot read row with: "+std::to_string(slotId)+" is not a valid slot id");
             }
 
             uint16_t offset = slotOffset(slotId);
@@ -136,7 +136,7 @@ namespace dandb {
         dandb::core::Status SlottedPage::updateRow(dandb::core::SlotId slotId, std::span<const std::byte> payload) {
 
             if(slotId >= slotCount()) {
-                return dandb::core::Status::InvalidArgument("Cannot update row : "+std::to_string(slotId)+" is not a valid slot id");
+                return dandb::core::Status::InvalidArgument("Cannot update row: "+std::to_string(slotId)+" is not a valid slot id");
             }
 
             uint16_t offset = slotOffset(slotId);

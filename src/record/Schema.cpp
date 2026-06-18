@@ -57,7 +57,7 @@ namespace dandb {
                 }
 
                 if(col.type != LogicalType::String && col.stringCapacity != 0) {
-                    return dandb::core::Status::InvalidArgument("Cannot create schema: some non-string columns string capacity");
+                    return dandb::core::Status::InvalidArgument("Cannot create schema: some non-string columns have string capacity");
                 }
 
             }
