@@ -20,6 +20,20 @@
       }
     },
     {
+      "name": "gxx-sanitize-debug",
+      "displayName": "g++ Sanitizer Debug",
+      "description": "Configure DanDB with Ninja, g++, debug symbols, and sanitizers.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/gxx-sanitize-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "DANDB_BUILD_TESTS": "ON",
+        "DANDB_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
       "name": "gxx-release",
       "displayName": "g++ Release",
       "description": "Configure DanDB with Ninja, g++, and release optimizations.",
@@ -66,6 +80,11 @@
       "configurePreset": "gxx-debug"
     },
     {
+      "name": "gxx-sanitize-debug",
+      "displayName": "Build g++ Sanitizer Debug",
+      "configurePreset": "gxx-sanitize-debug"
+    },
+    {
       "name": "gxx-release",
       "displayName": "Build g++ Release",
       "configurePreset": "gxx-release"
@@ -86,6 +105,14 @@
       "name": "gxx-debug",
       "displayName": "Test g++ Debug",
       "configurePreset": "gxx-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "gxx-sanitize-debug",
+      "displayName": "Test g++ Sanitizer Debug",
+      "configurePreset": "gxx-sanitize-debug",
       "output": {
         "outputOnFailure": true
       }
