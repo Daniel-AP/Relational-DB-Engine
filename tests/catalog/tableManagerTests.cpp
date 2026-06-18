@@ -612,3 +612,118 @@ TEST_CASE("TableManager open rejects corrupt tables.meta magic bytes", "[catalog
     REQUIRE(manager.status().code() == dandb::core::StatusCode::Corruption);
 
 }
+
+TEST_CASE("TableManager open rejects a next table id that would reuse an existing table id", "[catalog][table-manager]") {
+
+    const TempDir tempDir("corrupt_next_table_id");
+    dandb::storage::DiskManager disk(tempDir.path()/"data.pages", { 'D', 'P', 'A', 'G' });
+    dandb::buffer::BufferPoolManager bufferPool(2, disk);
+
+    writeFileBytes(tempDir.path()/"tables.meta", {
+        'D', 'T', 'B', 'L',
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        0, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        5, 0, 'u', 's', 'e', 'r', 's', 0,
+        TYPE_INT32, FLAG_PRIMARY_KEY, 0, 0,
+        2, 0, 'i', 'd'
+    });
+
+    const auto manager = dandb::catalog::TableManager::open(tempDir.path()/"tables.meta", bufferPool);
+
+    REQUIRE_FALSE(manager.ok());
+    REQUIRE(manager.status().code() == dandb::core::StatusCode::Corruption);
+
+}
+
+TEST_CASE("TableManager open rejects duplicate table ids", "[catalog][table-manager]") {
+
+    const TempDir tempDir("corrupt_duplicate_table_id");
+    dandb::storage::DiskManager disk(tempDir.path()/"data.pages", { 'D', 'P', 'A', 'G' });
+    dandb::buffer::BufferPoolManager bufferPool(2, disk);
+
+    writeFileBytes(tempDir.path()/"tables.meta", {
+        'D', 'T', 'B', 'L',
+        2, 0, 0, 0,
+        2, 0, 0, 0,
+        0, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        5, 0, 'u', 's', 'e', 'r', 's', 0,
+        TYPE_INT32, FLAG_PRIMARY_KEY, 0, 0,
+        2, 0, 'i', 'd',
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        5, 0, 'p', 'o', 's', 't', 's', 0,
+        TYPE_INT32, FLAG_PRIMARY_KEY, 0, 0,
+        2, 0, 'i', 'd'
+    });
+
+    const auto manager = dandb::catalog::TableManager::open(tempDir.path()/"tables.meta", bufferPool);
+
+    REQUIRE_FALSE(manager.ok());
+    REQUIRE(manager.status().code() == dandb::core::StatusCode::Corruption);
+
+}
+
+TEST_CASE("TableManager open rejects table metadata with page zero", "[catalog][table-manager]") {
+
+    const TempDir tempDir("corrupt_page_zero");
+    dandb::storage::DiskManager disk(tempDir.path()/"data.pages", { 'D', 'P', 'A', 'G' });
+    dandb::buffer::BufferPoolManager bufferPool(2, disk);
+
+    writeFileBytes(tempDir.path()/"tables.meta", {
+        'D', 'T', 'B', 'L',
+        2, 0, 0, 0,
+        1, 0, 0, 0,
+        0, 0, 0, 0,
+        1, 0, 0, 0,
+        0, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        5, 0, 'u', 's', 'e', 'r', 's', 0,
+        TYPE_INT32, FLAG_PRIMARY_KEY, 0, 0,
+        2, 0, 'i', 'd'
+    });
+
+    const auto manager = dandb::catalog::TableManager::open(tempDir.path()/"tables.meta", bufferPool);
+
+    REQUIRE_FALSE(manager.ok());
+    REQUIRE(manager.status().code() == dandb::core::StatusCode::Corruption);
+
+}
+
+TEST_CASE("TableManager open rejects table metadata with an invalid last page id", "[catalog][table-manager]") {
+
+    const TempDir tempDir("corrupt_invalid_last_page_id");
+    dandb::storage::DiskManager disk(tempDir.path()/"data.pages", { 'D', 'P', 'A', 'G' });
+    dandb::buffer::BufferPoolManager bufferPool(2, disk);
+
+    writeFileBytes(tempDir.path()/"tables.meta", {
+        'D', 'T', 'B', 'L',
+        2, 0, 0, 0,
+        1, 0, 0, 0,
+        0, 0, 0, 0,
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        0xFF, 0xFF, 0xFF, 0xFF,
+        1, 0, 0, 0,
+        5, 0, 'u', 's', 'e', 'r', 's', 0,
+        TYPE_INT32, FLAG_PRIMARY_KEY, 0, 0,
+        2, 0, 'i', 'd'
+    });
+
+    const auto manager = dandb::catalog::TableManager::open(tempDir.path()/"tables.meta", bufferPool);
+
+    REQUIRE_FALSE(manager.ok());
+    REQUIRE(manager.status().code() == dandb::core::StatusCode::Corruption);
+
+}
