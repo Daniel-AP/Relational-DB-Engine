@@ -120,7 +120,7 @@ namespace dandb {
             }
 
             uint8_t lastNullBitmapByte = std::to_integer<uint8_t>(row[offset+nullBitmapSize-1]);
-            uint8_t unusedBitsMask = (0xFFu<<(count%8));
+            uint8_t unusedBitsMask = (count%8 == 0 ? 0 : (0xFFu<<(count%8)));
 
             if((lastNullBitmapByte&unusedBitsMask) != 0) {
                 return dandb::core::Status::InvalidArgument("Cannot decode row: null bitmap has non-zero unused bits");
